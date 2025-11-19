@@ -3,517 +3,529 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced WebOS</title>
+    <title>WebOS v5.0 - Minesweeper Edition</title>
     <style>
-        /* --- CSS Variables & Reset --- */
+        /* --- Reset & Variables --- */
         :root {
-            --bg-image: url('https://images.unsplash.com/photo-1477346611705-65d1883cee1e?auto=format&fit=crop&w=1920&q=80');
-            --lock-bg: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=80');
-            --primary-color: #0078d7;
-            --taskbar-bg: rgba(20, 20, 20, 0.9);
-            --window-bg: #ffffff;
-            --text-color: #000000;
-            --header-bg: #f0f0f0;
+            --bg-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=80');
+            --window-bg: #c0c0c0; /* Classic Gray */
+            --header-bg: #000080; /* Classic Blue Title */
+            --header-text: white;
+            --taskbar-height: 40px;
         }
-
-        [data-theme="dark"] {
-            --window-bg: #2b2b2b;
-            --text-color: #ffffff;
-            --header-bg: #1f1f1f;
-        }
-
         * { box-sizing: border-box; user-select: none; }
-        body { margin: 0; padding: 0; font-family: "Segoe UI", sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
-        
-        /* --- Screen Layers --- */
-        .screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            transition: opacity 0.5s, transform 0.5s;
-        }
+        body { margin: 0; padding: 0; font-family: "Tahoma", "Segoe UI", sans-serif; overflow: hidden; height: 100vh; width: 100vw; background: #000; }
 
-        /* 1. Boot Screen */
+        /* --- Layers --- */
+        .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transition: 0.5s; }
+        
+        /* Boot Screen */
         #boot-screen {
-            background-color: #000;
-            z-index: 30000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
+            background: black; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
         }
-        .loader {
-            border: 4px solid #333;
-            border-top: 4px solid #fff;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid #0078d7; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 2. Lock Screen */
+        /* Lock Screen */
         #lock-screen {
-            background: var(--lock-bg) no-repeat center center fixed;
-            background-size: cover;
-            z-index: 20000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            background: var(--bg-image) center/cover no-repeat; z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        #lock-screen.hidden {
-            transform: translateY(-100%);
-            opacity: 0;
-            pointer-events: none;
-        }
-        .lock-time { font-size: 80px; font-weight: 100; margin: 0; }
-        .lock-date { font-size: 24px; margin-bottom: 40px; }
-        .login-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            background: rgba(0,0,0,0.2);
-            padding: 20px;
-            border-radius: 10px;
-            backdrop-filter: blur(5px);
-        }
-        .avatar { width: 80px; height: 80px; background: #ccc; border-radius: 50%; border: 2px solid white; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
-        .login-input { padding: 8px 12px; border: none; border-radius: 4px; width: 200px; font-size: 14px; }
-        .login-btn { padding: 8px 20px; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; }
+        #lock-screen.unlocked { transform: translateY(-100%); }
+        .time-large { font-size: 6rem; font-weight: 300; margin: 0; }
+        .login-btn { padding: 10px 40px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); backdrop-filter: blur(10px); cursor: pointer; border-radius: 30px; font-size: 1rem; }
+
+        /* Desktop */
+        #desktop { background: var(--bg-image) center/cover no-repeat; z-index: 1; overflow: hidden; }
         
-        /* 3. Desktop */
-        #desktop-screen {
-            background: var(--bg-image) no-repeat center center fixed;
-            background-size: cover;
-            z-index: 1;
+        .desktop-icons {
+            padding: 10px; display: flex; flex-direction: column; flex-wrap: wrap; height: calc(100% - var(--taskbar-height)); align-content: flex-start;
         }
+        .icon {
+            width: 86px; padding: 10px 5px; margin: 5px; text-align: center; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            border-radius: 4px; cursor: pointer; border: 1px solid transparent; transition: 0.1s;
+        }
+        .icon:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
+        .icon-emoji { font-size: 2.5rem; display: block; margin-bottom: 5px; }
 
-        /* Desktop Icons */
-        .icon-container {
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            flex-wrap: wrap;
-            height: calc(100vh - 45px);
-            align-content: flex-start;
-        }
-        .app-icon {
-            width: 84px;
-            height: 90px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 5px;
-            color: white;
-            text-shadow: 1px 1px 3px black;
-            border: 1px solid transparent;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .app-icon:hover { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); }
-        .app-icon span { font-size: 36px; margin-bottom: 5px; }
-
-        /* Windows */
+        /* Windows (Retro Style) */
         .window {
-            position: absolute;
-            background-color: var(--window-bg);
-            color: var(--text-color);
-            border: 1px solid #555;
-            border-radius: 6px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            display: flex;
-            flex-direction: column;
-            min-width: 200px; min-height: 150px;
-            opacity: 0; transform: scale(0.9);
-            transition: opacity 0.2s, transform 0.2s;
-            pointer-events: none;
+            position: absolute; background: var(--window-bg); 
+            border: 2px solid; border-color: #dfdfdf #404040 #404040 #dfdfdf;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.5); display: flex; flex-direction: column;
+            min-width: 200px; min-height: 150px; overflow: hidden;
+            opacity: 0; transform: scale(0.95); transition: opacity 0.1s, transform 0.1s;
+            pointer-events: none; 
         }
         .window.active { opacity: 1; transform: scale(1); pointer-events: auto; }
-        .window.minimized { opacity: 0; transform: translateY(100px) scale(0.5); pointer-events: none; transition: 0.3s; }
+        .window.minimized { opacity: 0; transform: translateY(200px) scale(0.5); pointer-events: none; }
 
         .win-header {
-            background: var(--header-bg);
-            padding: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #ccc;
-            border-radius: 6px 6px 0 0;
+            background: var(--header-bg); color: var(--header-text);
+            padding: 2px 4px; height: 28px; display: flex; align-items: center; justify-content: space-between;
+            font-weight: bold; font-size: 13px;
         }
-        .win-controls button {
-            border: none; background: transparent; width: 28px; height: 28px;
-            border-radius: 4px; cursor: pointer; font-size: 14px; color: var(--text-color);
+        .win-actions { display: flex; gap: 2px; }
+        .win-btn { 
+            width: 20px; height: 20px; border: 1px solid; border-color: #dfdfdf #404040 #404040 #dfdfdf;
+            background: #c0c0c0; font-size: 12px; line-height: 1; display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
         }
-        .win-controls button:hover { background: rgba(0,0,0,0.1); }
-        .win-controls button.close-btn:hover { background: #e81123; color: white; }
+        .win-btn:active { border-color: #404040 #dfdfdf #dfdfdf #404040; }
+        .win-btn.close { font-family: monospace; font-weight: bold; }
+
+        .win-content { flex: 1; position: relative; background: white; overflow: hidden; }
+
+        /* Minesweeper Styles */
+        .ms-outer { background: #c0c0c0; padding: 10px; height: 100%; display: flex; flex-direction: column; align-items: center; }
+        .ms-header {
+            border: 2px solid; border-color: #808080 #fff #fff #808080;
+            width: 100%; padding: 5px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: #c0c0c0;
+        }
+        .ms-counter {
+            background: black; color: red; font-family: "Courier New", monospace; font-size: 20px; font-weight: bold;
+            padding: 0 2px; border: 1px solid #808080; width: 40px; text-align: center;
+        }
+        .ms-face {
+            width: 26px; height: 26px; font-size: 18px; cursor: pointer;
+            border: 2px solid; border-color: #fff #808080 #808080 #fff; background: #c0c0c0;
+            display: flex; align-items: center; justify-content: center; padding-bottom: 2px;
+        }
+        .ms-face:active { border-color: #808080 #fff #fff #808080; padding-top: 2px; padding-bottom: 0; }
         
-        .win-body { flex: 1; overflow: auto; padding: 10px; position: relative; }
+        .ms-grid {
+            display: grid; grid-template-columns: repeat(9, 25px); grid-template-rows: repeat(9, 25px);
+            border: 3px solid; border-color: #808080 #fff #fff #808080;
+        }
+        .ms-cell {
+            width: 25px; height: 25px; background: #c0c0c0;
+            border: 2px solid; border-color: #fff #808080 #808080 #fff;
+            font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center;
+            cursor: default;
+        }
+        .ms-cell.revealed {
+            border: 1px solid #808080; background: #c0c0c0;
+        }
+        .ms-cell.bomb-revealed { background: red; border: 1px solid #808080; }
         
-        /* App Specifics */
-        .browser-bar { display: flex; gap: 5px; padding-bottom: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
-        .url-input { flex: 1; padding: 4px 10px; border-radius: 15px; border: 1px solid #ccc; background: #f1f1f1; font-size: 13px; }
-        
-        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-        
-        textarea { width: 100%; height: 100%; border: none; background: transparent; color: var(--text-color); resize: none; outline: none; font-family: monospace; }
+        /* Numbers Colors */
+        .ms-c1 { color: blue; } .ms-c2 { color: green; } .ms-c3 { color: red; } .ms-c4 { color: navy; }
+        .ms-c5 { color: maroon; } .ms-c6 { color: teal; } .ms-c7 { color: black; } .ms-c8 { color: gray; }
+
+        /* Browser Iframe */
+        .browser-nav { display: flex; gap: 5px; padding: 5px; background: #c0c0c0; border-bottom: 1px solid #888; }
+        .iframe-blocker { position: absolute; top:0; left:0; width:100%; height:100%; display: none; }
 
         /* Taskbar */
-        .taskbar {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 45px;
-            background: var(--taskbar-bg);
-            display: flex; align-items: center;
-            padding: 0 10px;
-            backdrop-filter: blur(10px);
-            z-index: 10000;
+        #taskbar {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: var(--taskbar-height);
+            background: #c0c0c0; border-top: 2px solid #fff;
+            display: flex; align-items: center; padding: 2px; z-index: 10000;
         }
-        .start-btn { width: 40px; height: 35px; display: flex; justify-content: center; align-items: center; border-radius: 4px; cursor: pointer; margin-right: 10px; }
-        .start-btn:hover { background: rgba(255,255,255,0.1); }
-        .task-list { display: flex; flex: 1; gap: 2px; height: 100%; padding: 3px 0; }
+        .start-btn {
+            height: 32px; padding: 0 10px; display: flex; align-items: center; gap: 5px;
+            border: 2px solid; border-color: #fff #404040 #404040 #fff;
+            font-weight: bold; font-style: italic; cursor: pointer; margin-right: 5px;
+        }
+        .start-btn:active { border-color: #404040 #fff #fff #404040; transform: translateY(1px); }
+        
+        .task-container { flex: 1; display: flex; gap: 2px; padding-left: 5px; }
         .task-item {
-            width: 140px;
-            display: flex; align-items: center; padding: 0 10px;
-            color: white; font-size: 12px;
-            cursor: pointer; border-radius: 3px;
-            background: rgba(255,255,255,0.05);
-            border-bottom: 2px solid transparent;
+            width: 150px; background: #c0c0c0; border: 2px solid; border-color: #fff #404040 #404040 #fff;
+            padding: 4px 8px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .task-item:hover { background: rgba(255,255,255,0.1); }
-        .task-item.focused { background: rgba(255,255,255,0.15); border-bottom: 2px solid var(--primary-color); }
-        .tray { display: flex; color: white; font-size: 12px; text-align: center; gap: 15px; padding-right: 10px; }
+        .task-item.active-task {
+            background: #e0e0e0; border-color: #404040 #fff #fff #404040; background-image: linear-gradient(45deg, #ddd 25%, transparent 25%, transparent 50%, #ddd 50%, #ddd 75%, transparent 75%, transparent); background-size: 4px 4px;
+        }
+
+        .sys-tray { margin-left: auto; padding: 0 10px; font-size: 12px; border: 2px solid; border-color: #808080 #fff #fff #808080; background: #c0c0c0; height: 30px; display: flex; align-items: center; }
+
+        /* Start Menu */
+        #start-menu {
+            position: fixed; bottom: 42px; left: 2px; width: 200px; background: #c0c0c0;
+            border: 2px solid; border-color: #fff #404040 #404040 #fff; padding: 2px; z-index: 10001;
+            display: none; flex-direction: column;
+        }
+        #start-menu.open { display: flex; }
+        .menu-row { padding: 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .menu-row:hover { background: #000080; color: white; }
     </style>
 </head>
 <body>
 
-    <div id="boot-screen" class="screen">
-        <div class="loader"></div>
-        <h2>WebOS</h2>
-        <p>Starting up...</p>
+    <div id="boot-screen" class="layer">
+        <div class="spinner"></div>
+        <h2>WebOS v5.0</h2>
+        <p>Minesweeper Edition</p>
     </div>
 
-    <div id="lock-screen" class="screen">
-        <div class="lock-time" id="lock-clock">12:00</div>
-        <div class="lock-date" id="lock-date">1月1日 月曜日</div>
-        <div class="login-box">
-            <div class="avatar">👤</div>
-            <div style="font-size:18px; margin-bottom: 5px;">Admin User</div>
-            <input type="password" class="login-input" id="password-input" placeholder="パスワード (入力不要)" onkeydown="checkLogin(event)">
-            <button class="login-btn" onclick="unlock()">ログイン</button>
-        </div>
+    <div id="lock-screen" class="layer" style="display:none;">
+        <div class="time-large" id="lock-time">12:00</div>
+        <button class="login-btn" onclick="unlockSystem()">Click to Login</button>
     </div>
 
-    <div id="desktop-screen" class="screen">
-        <div class="icon-container">
-            <div class="app-icon" onclick="openWindow('notepad')"><span>📝</span>メモ帳</div>
-            <div class="app-icon" onclick="openWindow('browser')"><span>🌐</span>ブラウザ</div>
-            <div class="app-icon" onclick="openWindow('settings')"><span>⚙️</span>設定</div>
-            <div class="app-icon" onclick="openWindow('calc')"><span>🧮</span>電卓</div>
-            <div class="app-icon" onclick="alert('ゴミ箱は空です。')"><span>🗑️</span>ゴミ箱</div>
-        </div>
-
-        <div id="win-notepad" class="window" style="top: 50px; left: 50px; width: 400px; height: 300px;" data-title="メモ帳">
-            <div class="win-header" onmousedown="dragStart(event, 'win-notepad')">
-                <span>無題 - メモ帳</span>
-                <div class="win-controls">
-                    <button onclick="minimizeWindow('win-notepad')">_</button>
-                    <button class="close-btn" onclick="closeWindow('win-notepad')">×</button>
-                </div>
-            </div>
-            <div class="win-body">
-                <textarea placeholder="ここに入力..."></textarea>
-            </div>
-        </div>
-
-        <div id="win-browser" class="window" style="top: 80px; left: 100px; width: 600px; height: 450px;" data-title="ブラウザ">
-            <div class="win-header" onmousedown="dragStart(event, 'win-browser')">
-                <span>Web Browser</span>
-                <div class="win-controls">
-                    <button onclick="minimizeWindow('win-browser')">_</button>
-                    <button class="close-btn" onclick="closeWindow('win-browser')">×</button>
-                </div>
-            </div>
-            <div class="win-body" style="display: flex; flex-direction: column;">
-                <div class="browser-bar">
-                    <button>⬅</button><button>➡</button><button>↻</button>
-                    <input type="text" class="url-input" value="https://welcome.webos.net" readonly>
-                </div>
-                <div style="flex:1; background: #fff; border: 1px solid #ccc; padding: 20px; color: #333;">
-                    <h1>Welcome to WebOS Browser</h1>
-                    <p>これはシミュレーション用の擬似ブラウザです。</p>
-                    <hr>
-                    <h3>News</h3>
-                    <ul>
-                        <li>WebOS v2.0がリリースされました。</li>
-                        <li>新しいロック画面機能が追加されました。</li>
-                        <li>ダークモードに対応しました。</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="win-settings" class="window" style="top: 120px; left: 200px; width: 350px; height: 400px;" data-title="設定">
-            <div class="win-header" onmousedown="dragStart(event, 'win-settings')">
-                <span>設定</span>
-                <div class="win-controls">
-                    <button onclick="minimizeWindow('win-settings')">_</button>
-                    <button class="close-btn" onclick="closeWindow('win-settings')">×</button>
-                </div>
-            </div>
-            <div class="win-body">
-                <h3>システム設定</h3>
-                <div class="setting-row">
-                    <span>ダークモード</span>
-                    <input type="checkbox" onchange="toggleTheme(this)">
-                </div>
-                <div class="setting-row">
-                    <span>デスクトップ壁紙</span>
-                    <select onchange="changeWallpaper(this)">
-                        <option value="landscape">山岳 (デフォルト)</option>
-                        <option value="city">都市の夜景</option>
-                        <option value="abstract">抽象画</option>
-                    </select>
-                </div>
-                <div class="setting-row">
-                    <span>バージョン情報</span>
-                    <span style="color: #888;">v2.0.0</span>
-                </div>
-                <br>
-                <button style="width:100%; padding:10px; background:#e81123; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="location.reload()">シャットダウン (再起動)</button>
-            </div>
-        </div>
+    <div id="desktop" class="layer" style="display:none;">
         
-        <div id="win-calc" class="window" style="top: 150px; left: 300px; width: 220px; height: 300px;" data-title="電卓">
-            <div class="win-header" onmousedown="dragStart(event, 'win-calc')">
-                <span>電卓</span>
-                <div class="win-controls">
-                    <button onclick="minimizeWindow('win-calc')">_</button>
-                    <button class="close-btn" onclick="closeWindow('win-calc')">×</button>
+        <div class="desktop-icons">
+            <div class="icon" onclick="app.open('game')">
+                <span class="icon-emoji">💣</span>
+                <span>マインスイーパ</span>
+            </div>
+            <div class="icon" onclick="app.open('browser')">
+                <span class="icon-emoji">🌐</span>
+                <span>ブラウザ</span>
+            </div>
+            <div class="icon" onclick="app.open('notepad')">
+                <span class="icon-emoji">📝</span>
+                <span>メモ帳</span>
+            </div>
+            <div class="icon" onclick="app.open('settings')">
+                <span class="icon-emoji">⚙️</span>
+                <span>設定</span>
+            </div>
+        </div>
+
+        <div id="win-game" class="window" style="width: 280px; height: 360px; top: 50px; left: 150px;" data-title="マインスイーパ">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-game')">
+                <span>マインスイーパ</span>
+                <div class="win-actions">
+                    <button class="win-btn" onclick="wm.minimize('win-game')">_</button>
+                    <button class="win-btn close" onclick="wm.close('win-game')">×</button>
                 </div>
             </div>
-            <div class="win-body" style="display:flex; flex-direction:column; gap:5px;">
-                <div id="calc-display" style="background:#eee; color:#333; padding:10px; text-align:right; font-size:20px; margin-bottom:5px; border-radius:4px;">0</div>
-                <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:5px; flex:1;">
-                    <button onclick="calc('7')">7</button><button onclick="calc('8')">8</button><button onclick="calc('9')">9</button><button onclick="calc('/')">÷</button>
-                    <button onclick="calc('4')">4</button><button onclick="calc('5')">5</button><button onclick="calc('6')">6</button><button onclick="calc('*')">×</button>
-                    <button onclick="calc('1')">1</button><button onclick="calc('2')">2</button><button onclick="calc('3')">3</button><button onclick="calc('-')">-</button>
-                    <button onclick="calc('C')" style="background:#ffcccc">C</button><button onclick="calc('0')">0</button><button onclick="calc('=')">=</button><button onclick="calc('+')">+</button>
+            <div class="win-content">
+                <div class="ms-outer" oncontextmenu="return false;">
+                    <div class="ms-header">
+                        <div class="ms-counter" id="ms-bomb-count">010</div>
+                        <button class="ms-face" id="ms-face-btn" onclick="minesweeper.init()">🙂</button>
+                        <div class="ms-counter" id="ms-timer">000</div>
+                    </div>
+                    <div id="ms-grid" class="ms-grid"></div>
                 </div>
             </div>
         </div>
 
-        <div class="taskbar">
-            <div class="start-btn" onclick="toggleStartMenu()">
-                <div style="font-size: 22px; color: white;">❖</div>
-            </div>
-            <div class="task-list" id="task-list">
+        <div id="win-browser" class="window" style="width: 800px; height: 600px; top: 30px; left: 30px;" data-title="ブラウザ">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-browser')">
+                <span>Web Browser</span>
+                <div class="win-actions">
+                    <button class="win-btn" onclick="wm.minimize('win-browser')">_</button>
+                    <button class="win-btn close" onclick="wm.close('win-browser')">×</button>
                 </div>
-            <div class="tray">
-                <span id="tray-wifi">📶</span>
-                <span id="tray-audio">🔊</span>
-                <span id="tray-clock">00:00</span>
+            </div>
+            <div class="win-content" style="display:flex; flex-direction:column;">
+                <div class="browser-nav">
+                    <input type="text" id="browser-url" style="flex:1;" value="https://ja.m.wikipedia.org/wiki/Main_Page" onkeydown="if(event.key==='Enter') browser.go()">
+                    <button onclick="browser.go()">Go</button>
+                </div>
+                <div style="flex:1; position:relative;">
+                    <div class="iframe-blocker" id="browser-blocker"></div>
+                    <iframe id="browser-frame" src="about:blank" style="width:100%; height:100%; border:none;"></iframe>
+                </div>
             </div>
         </div>
+
+        <div id="win-notepad" class="window" style="width: 300px; height: 200px; top: 100px; left: 100px;" data-title="メモ帳">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-notepad')">
+                <span>無題 - メモ帳</span>
+                <div class="win-actions">
+                    <button class="win-btn" onclick="wm.minimize('win-notepad')">_</button>
+                    <button class="win-btn close" onclick="wm.close('win-notepad')">×</button>
+                </div>
+            </div>
+            <div class="win-content">
+                <textarea style="width:100%; height:100%; resize:none; border:none; padding:5px;"></textarea>
+            </div>
+        </div>
+
+        <div id="win-settings" class="window" style="width: 250px; height: 200px; top: 150px; left: 200px;" data-title="設定">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-settings')">
+                <span>設定</span>
+                <div class="win-actions"><button class="win-btn close" onclick="wm.close('win-settings')">×</button></div>
+            </div>
+            <div class="win-content" style="padding:10px;">
+                <p>背景設定:</p>
+                <button onclick="document.documentElement.style.setProperty('--bg-image', 'url(https://images.unsplash.com/photo-1477346611705-65d1883cee1e?auto=format&fit=crop&w=1920)')">山</button>
+                <button onclick="document.documentElement.style.setProperty('--bg-image', 'url(https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1920)')">都市</button>
+            </div>
+        </div>
+
+        <div id="taskbar">
+            <div class="start-btn" onclick="sys.toggleStart()">
+                <span style="color:red; font-weight:900;">❖</span> Start
+            </div>
+            <div class="task-container" id="task-list"></div>
+            <div class="sys-tray">
+                <span id="clock">00:00</span>
+            </div>
+        </div>
+
+        <div id="start-menu">
+            <div class="menu-row" onclick="app.open('game'); sys.toggleStart()">💣 マインスイーパ</div>
+            <div class="menu-row" onclick="app.open('browser'); sys.toggleStart()">🌐 ブラウザ</div>
+            <div class="menu-row" onclick="app.open('notepad'); sys.toggleStart()">📝 メモ帳</div>
+            <div style="height:1px; background:#808080; margin:5px 0;"></div>
+            <div class="menu-row" onclick="sys.shutdown()">⏻ シャットダウン</div>
+        </div>
+
     </div>
 
     <script>
-        /* --- System Logic --- */
-        
-        // Boot Sequence
-        window.onload = function() {
-            setTimeout(() => {
-                document.getElementById('boot-screen').style.opacity = '0';
+        /* --- SYSTEM --- */
+        const sys = {
+            boot: () => {
                 setTimeout(() => {
                     document.getElementById('boot-screen').style.display = 'none';
-                    updateClock(); // Start clock immediately
-                }, 500);
-            }, 2000); // 2 seconds boot time
+                    document.getElementById('lock-screen').style.display = 'flex';
+                    sys.updateClock();
+                }, 1500);
+            },
+            updateClock: () => {
+                const now = new Date();
+                const t = now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+                document.getElementById('clock').textContent = t;
+                document.getElementById('lock-time').textContent = t;
+            },
+            toggleStart: () => document.getElementById('start-menu').classList.toggle('open'),
+            shutdown: () => {
+                document.getElementById('desktop').style.filter='grayscale(1)';
+                setTimeout(()=>location.reload(), 1000);
+            }
+        };
+        setInterval(sys.updateClock, 1000);
+        window.onload = sys.boot;
+        function unlockSystem() {
+            document.getElementById('lock-screen').classList.add('unlocked');
+            document.getElementById('desktop').style.display = 'block';
+        }
+
+        /* --- WM --- */
+        let zIndex = 100;
+        const wm = {
+            open: (id) => {
+                const w = document.getElementById(id);
+                w.classList.remove('minimized'); w.classList.add('active');
+                wm.toFront(w);
+                taskbar.add(id, w.dataset.title);
+            },
+            close: (id) => {
+                document.getElementById(id).classList.remove('active');
+                taskbar.remove(id);
+                if(id==='win-game') minesweeper.reset();
+            },
+            minimize: (id) => {
+                document.getElementById(id).classList.add('minimized');
+                document.getElementById(id).classList.remove('active');
+                taskbar.update(null);
+            },
+            toFront: (w) => {
+                w.style.zIndex = ++zIndex;
+                taskbar.update(w.id);
+            },
+            startDrag: (e, id) => {
+                if(e.target.classList.contains('win-btn')) return;
+                const w = document.getElementById(id);
+                wm.toFront(w);
+                if(id === 'win-browser') document.getElementById('browser-blocker').style.display='block';
+                
+                const r = w.getBoundingClientRect();
+                const offX = e.clientX - r.left, offY = e.clientY - r.top;
+                
+                const move = (ev) => {
+                    w.style.left = (ev.clientX - offX) + 'px';
+                    w.style.top = Math.max(0, ev.clientY - offY) + 'px';
+                };
+                const stop = () => {
+                    document.removeEventListener('mousemove', move);
+                    document.removeEventListener('mouseup', stop);
+                    if(id === 'win-browser') document.getElementById('browser-blocker').style.display='none';
+                };
+                document.addEventListener('mousemove', move);
+                document.addEventListener('mouseup', stop);
+            }
+        };
+        document.querySelectorAll('.window').forEach(w=>w.addEventListener('mousedown',()=>wm.toFront(w)));
+
+        /* --- TASKBAR --- */
+        const taskbar = {
+            add: (id, title) => {
+                if(document.getElementById('task-'+id)) return;
+                const el = document.createElement('div');
+                el.id = 'task-'+id; el.className='task-item active-task';
+                el.innerHTML = (id==='win-game'?'💣 ':id==='win-browser'?'🌐 ':'📝 ') + title;
+                el.onclick = () => {
+                    const w = document.getElementById(id);
+                    if(w.classList.contains('active') && w.style.zIndex==zIndex) wm.minimize(id);
+                    else wm.open(id);
+                };
+                document.getElementById('task-list').appendChild(el);
+            },
+            remove: (id) => { const el = document.getElementById('task-'+id); if(el) el.remove(); },
+            update: (id) => {
+                document.querySelectorAll('.task-item').forEach(t => t.classList.remove('active-task'));
+                if(id) document.getElementById('task-'+id)?.classList.add('active-task');
+            }
         };
 
-        // Lock Screen Logic
-        function updateClock() {
-            const now = new Date();
-            
-            // For Lock Screen
-            const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            const dateStr = now.toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'long' });
-            document.getElementById('lock-clock').innerText = timeStr;
-            document.getElementById('lock-date').innerText = dateStr;
-            
-            // For Taskbar
-            document.getElementById('tray-clock').innerText = timeStr;
-        }
-        setInterval(updateClock, 1000);
-
-        function checkLogin(e) {
-            if (e.key === 'Enter') unlock();
-        }
-
-        function unlock() {
-            const lockScreen = document.getElementById('lock-screen');
-            lockScreen.classList.add('hidden');
-            // Play startup sound effect here if desired
-        }
-
-        /* --- Window Management --- */
-        let zIndex = 100;
-        let activeWindows = {}; // Store state
-
-        function openWindow(appId) {
-            const winId = 'win-' + appId;
-            const win = document.getElementById(winId);
-            
-            if (!win) return;
-            
-            // Bring to front & Show
-            win.style.display = 'flex'; // Ensure it's visible in DOM
-            setTimeout(() => {
-                win.classList.remove('minimized');
-                win.classList.add('active');
-            }, 10);
-            
-            moveFront(win);
-            addToTaskbar(winId, win.getAttribute('data-title'));
-        }
-
-        function closeWindow(winId) {
-            const win = document.getElementById(winId);
-            win.classList.remove('active');
-            setTimeout(() => { win.style.display = 'none'; }, 200); // Wait for anim
-            removeFromTaskbar(winId);
-        }
-
-        function minimizeWindow(winId) {
-            const win = document.getElementById(winId);
-            win.classList.add('minimized');
-            win.classList.remove('active');
-            updateTaskbarHighlight(null);
-        }
-
-        function moveFront(win) {
-            zIndex++;
-            win.style.zIndex = zIndex;
-            
-            // Update Visuals
-            document.querySelectorAll('.window').forEach(w => w.style.borderColor = '#555');
-            win.style.borderColor = '#0078d7';
-            
-            updateTaskbarHighlight(win.id);
-        }
-
-        /* --- Taskbar Logic --- */
-        function addToTaskbar(winId, title) {
-            const list = document.getElementById('task-list');
-            if (document.getElementById('task-' + winId)) return; // Already exists
-
-            const item = document.createElement('div');
-            item.className = 'task-item';
-            item.id = 'task-' + winId;
-            item.innerHTML = `<span>${title}</span>`;
-            item.onclick = () => toggleWindowFromTaskbar(winId);
-            list.appendChild(item);
-            updateTaskbarHighlight(winId);
-        }
-
-        function removeFromTaskbar(winId) {
-            const item = document.getElementById('task-' + winId);
-            if (item) item.remove();
-        }
-
-        function toggleWindowFromTaskbar(winId) {
-            const win = document.getElementById(winId);
-            if (win.classList.contains('minimized') || win.style.zIndex != zIndex) {
-                win.classList.remove('minimized');
-                moveFront(win);
-            } else {
-                minimizeWindow(winId);
+        /* --- APPS --- */
+        const app = {
+            open: (name) => {
+                wm.open('win-'+name);
+                if(name==='browser') browser.init();
+                if(name==='game') minesweeper.init();
             }
-        }
-
-        function updateTaskbarHighlight(activeWinId) {
-            document.querySelectorAll('.task-item').forEach(item => item.classList.remove('focused'));
-            if (activeWinId) {
-                const item = document.getElementById('task-' + activeWinId);
-                if (item) item.classList.add('focused');
+        };
+        const browser = {
+            init: () => {
+                const f = document.getElementById('browser-frame');
+                if(f.src==='about:blank') f.src="https://ja.m.wikipedia.org/wiki/Main_Page";
+            },
+            go: () => {
+                let u = document.getElementById('browser-url').value;
+                if(!u.startsWith('http')) u = 'https://ja.m.wikipedia.org/w/index.php?search='+encodeURIComponent(u);
+                document.getElementById('browser-frame').src = u;
             }
-        }
+        };
 
-        /* --- Drag Logic --- */
-        let isDragging = false;
-        let currentDragWin = null;
-        let offset = {x:0, y:0};
+        /* --- MINESWEEPER LOGIC --- */
+        const minesweeper = {
+            rows: 9, cols: 9, bombCount: 10,
+            grid: [], bombs: [], revealed: [], flagged: [],
+            gameOver: false, timer: 0, timerInt: null,
 
-        function dragStart(e, winId) {
-            isDragging = true;
-            currentDragWin = document.getElementById(winId);
-            moveFront(currentDragWin);
-            const rect = currentDragWin.getBoundingClientRect();
-            offset.x = e.clientX - rect.left;
-            offset.y = e.clientY - rect.top;
-        }
+            init: () => {
+                const ms = minesweeper;
+                ms.gameOver = false;
+                ms.grid = document.getElementById('ms-grid');
+                ms.grid.innerHTML = '';
+                ms.bombs = Array(ms.rows * ms.cols).fill(false);
+                ms.revealed = Array(ms.rows * ms.cols).fill(false);
+                ms.flagged = Array(ms.rows * ms.cols).fill(false);
+                document.getElementById('ms-face-btn').textContent = '🙂';
+                document.getElementById('ms-bomb-count').textContent = ms.pad(ms.bombCount);
+                
+                // Place bombs
+                let placed = 0;
+                while(placed < ms.bombCount) {
+                    let idx = Math.floor(Math.random() * (ms.rows * ms.cols));
+                    if(!ms.bombs[idx]) { ms.bombs[idx] = true; placed++; }
+                }
 
-        document.addEventListener('mousemove', e => {
-            if (!isDragging || !currentDragWin) return;
-            e.preventDefault();
-            let x = e.clientX - offset.x;
-            let y = e.clientY - offset.y;
-            
-            // Boundaries (simple)
-            if (y < 0) y = 0;
-            
-            currentDragWin.style.left = x + 'px';
-            currentDragWin.style.top = y + 'px';
-        });
+                // Create Cells
+                for(let i=0; i<ms.rows*ms.cols; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'ms-cell';
+                    cell.onmousedown = (e) => {
+                        if(ms.gameOver) return;
+                        document.getElementById('ms-face-btn').textContent = '😮';
+                        if(e.button === 2) ms.toggleFlag(i);
+                        else if(e.button === 0) ms.reveal(i);
+                    };
+                    cell.onmouseup = () => {
+                        if(!ms.gameOver) document.getElementById('ms-face-btn').textContent = '🙂';
+                    };
+                    ms.grid.appendChild(cell);
+                }
+                
+                // Timer
+                if(ms.timerInt) clearInterval(ms.timerInt);
+                ms.timer = 0;
+                document.getElementById('ms-timer').textContent = '000';
+                ms.timerInt = setInterval(()=>{
+                    if(!ms.gameOver) {
+                        ms.timer++;
+                        document.getElementById('ms-timer').textContent = ms.pad(Math.min(999, ms.timer));
+                    }
+                }, 1000);
+            },
 
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            currentDragWin = null;
-        });
+            reset: () => {
+                if(minesweeper.timerInt) clearInterval(minesweeper.timerInt);
+            },
 
-        // Allow clicking window body to focus
-        document.querySelectorAll('.window').forEach(win => {
-            win.addEventListener('mousedown', () => moveFront(win));
-        });
+            toggleFlag: (idx) => {
+                if(minesweeper.revealed[idx]) return;
+                minesweeper.flagged[idx] = !minesweeper.flagged[idx];
+                const cell = minesweeper.grid.children[idx];
+                cell.textContent = minesweeper.flagged[idx] ? '🚩' : '';
+                // Update count
+                let flags = minesweeper.flagged.filter(Boolean).length;
+                document.getElementById('ms-bomb-count').textContent = minesweeper.pad(minesweeper.bombCount - flags);
+            },
 
-        /* --- App Functions --- */
-        // Settings
-        function toggleTheme(checkbox) {
-            if (checkbox.checked) {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            } else {
-                document.documentElement.removeAttribute('data-theme');
-            }
-        }
+            reveal: (idx) => {
+                const ms = minesweeper;
+                if(ms.revealed[idx] || ms.flagged[idx]) return;
 
-        function changeWallpaper(select) {
-            const urls = {
-                landscape: 'url("https://images.unsplash.com/photo-1477346611705-65d1883cee1e?auto=format&fit=crop&w=1920&q=80")',
-                city: 'url("https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1920&q=80")',
-                abstract: 'url("https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1920&q=80")'
-            };
-            document.documentElement.style.setProperty('--bg-image', urls[select.value]);
-        }
+                ms.revealed[idx] = true;
+                const cell = ms.grid.children[idx];
+                cell.classList.add('revealed');
 
-        // Calc
-        let calcExp = "";
-        function calc(val) {
-            const display = document.getElementById('calc-display');
-            if (val === 'C') {
-                calcExp = "";
-                display.innerText = "0";
-            } else if (val === '=') {
-                try { display.innerText = eval(calcExp); calcExp = display.innerText; }
-                catch { display.innerText = "Error"; calcExp = ""; }
-            } else {
-                calcExp += val;
-                display.innerText = calcExp;
-            }
-        }
+                if(ms.bombs[idx]) {
+                    // Hit Bomb
+                    cell.classList.add('bomb-revealed');
+                    cell.textContent = '💣';
+                    ms.endGame(false);
+                } else {
+                    // Number or Empty
+                    let count = ms.countBombs(idx);
+                    if(count > 0) {
+                        cell.textContent = count;
+                        cell.classList.add('ms-c'+count);
+                    } else {
+                        // Flood fill
+                        ms.getNeighbors(idx).forEach(n => ms.reveal(n));
+                    }
+                    ms.checkWin();
+                }
+            },
+
+            countBombs: (idx) => {
+                return minesweeper.getNeighbors(idx).filter(n => minesweeper.bombs[n]).length;
+            },
+
+            getNeighbors: (idx) => {
+                const r = Math.floor(idx / 9), c = idx % 9;
+                const n = [];
+                for(let dr=-1; dr<=1; dr++) {
+                    for(let dc=-1; dc<=1; dc++) {
+                        if(dr===0 && dc===0) continue;
+                        const nr = r+dr, nc = c+dc;
+                        if(nr>=0 && nr<9 && nc>=0 && nc<9) n.push(nr*9 + nc);
+                    }
+                }
+                return n;
+            },
+
+            checkWin: () => {
+                const ms = minesweeper;
+                let safeCells = (ms.rows * ms.cols) - ms.bombCount;
+                let revealedCount = ms.revealed.filter(Boolean).length;
+                if(revealedCount === safeCells) ms.endGame(true);
+            },
+
+            endGame: (won) => {
+                minesweeper.gameOver = true;
+                clearInterval(minesweeper.timerInt);
+                document.getElementById('ms-face-btn').textContent = won ? '😎' : '😵';
+                if(!won) {
+                    // Reveal all bombs
+                    minesweeper.bombs.forEach((isBomb, i) => {
+                        if(isBomb) {
+                            const cell = minesweeper.grid.children[i];
+                            cell.textContent = '💣';
+                            if(!minesweeper.revealed[i]) cell.style.background = '#c0c0c0'; // transparent reveal
+                        }
+                    });
+                }
+            },
+
+            pad: (num) => num.toString().padStart(3, '0')
+        };
+
     </script>
 </body>
 </html>
