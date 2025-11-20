@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebOS v5.0 - Minesweeper Edition</title>
+    <title>WebOS v6.0 - Vista Edition</title>
     <style>
         /* --- Reset & Variables --- */
         :root {
             --bg-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1920&q=80');
-            --window-bg: #c0c0c0; /* Classic Gray */
-            --header-bg: #000080; /* Classic Blue Title */
+            --window-bg: linear-gradient(to bottom, #f0f0f0 0%, #e8e8e8 100%);
+            --header-bg: linear-gradient(to bottom, #4a90e2 0%, #357abd 50%, #2a5f8f 100%);
             --header-text: white;
             --taskbar-height: 40px;
+            --vista-blue: #4a90e2;
+            --vista-blue-dark: #2a5f8f;
+            --vista-gray: #f0f0f0;
+            --vista-shadow: 0 8px 16px rgba(0,0,0,0.3);
         }
         * { box-sizing: border-box; user-select: none; }
-        body { margin: 0; padding: 0; font-family: "Tahoma", "Segoe UI", sans-serif; overflow: hidden; height: 100vh; width: 100vw; background: #000; }
+        body { margin: 0; padding: 0; font-family: "Segoe UI", "Tahoma", sans-serif; overflow: hidden; height: 100vh; width: 100vw; background: #000; }
 
         /* --- Layers --- */
         .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transition: 0.5s; }
@@ -46,21 +50,31 @@
             height: calc(100% - var(--taskbar-height)); align-content: start;
         }
         .icon {
-            width: 100%; max-width: 100px; padding: 15px 10px; text-align: center; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-            border-radius: 8px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s ease;
+            width: 100%; max-width: 100px; padding: 15px 10px; text-align: center; color: white; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            border-radius: 6px; cursor: pointer; border: 1px solid transparent; 
+            transition: all 0.2s ease;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.05);
         }
-        .icon:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
+        .icon:hover { 
+            background: rgba(255,255,255,0.2); 
+            border-color: rgba(255,255,255,0.4);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transform: translateY(-2px);
+        }
         .icon-emoji { font-size: 3rem; display: block; margin-bottom: 8px; }
 
-        /* Windows (Retro Style) */
+        /* Windows Vista Style */
         .window {
             position: absolute; background: var(--window-bg); 
-            border: 2px solid; border-color: #dfdfdf #404040 #404040 #dfdfdf;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.5); display: flex; flex-direction: column;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            box-shadow: var(--vista-shadow), inset 0 1px 0 rgba(255,255,255,0.5);
+            display: flex; flex-direction: column;
             min-width: 200px; min-height: 150px; max-width: 95vw; max-height: 90vh;
             overflow: hidden;
-            opacity: 0; transform: scale(0.95); transition: opacity 0.1s, transform 0.1s;
+            opacity: 0; transform: scale(0.95); transition: opacity 0.2s ease, transform 0.2s ease;
             pointer-events: none; 
         }
         .window.active { opacity: 1; transform: scale(1); pointer-events: auto; }
@@ -68,16 +82,21 @@
 
         .win-header {
             background: var(--header-bg); color: var(--header-text);
-            padding: 2px 4px; height: 28px; display: flex; align-items: center; justify-content: space-between;
-            font-weight: bold; font-size: 13px;
+            padding: 6px 8px; height: 32px; display: flex; align-items: center; justify-content: space-between;
+            font-weight: 500; font-size: 13px; border-radius: 6px 6px 0 0;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
-        .win-actions { display: flex; gap: 2px; }
+        .win-actions { display: flex; gap: 4px; }
         .win-btn { 
-            width: 20px; height: 20px; border: 1px solid; border-color: #dfdfdf #404040 #404040 #dfdfdf;
-            background: #c0c0c0; font-size: 12px; line-height: 1; display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
+            width: 24px; height: 24px; border: none;
+            background: rgba(255,255,255,0.2); font-size: 14px; line-height: 1; 
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border-radius: 3px; transition: all 0.2s;
+            color: white;
         }
-        .win-btn:active { border-color: #404040 #dfdfdf #dfdfdf #404040; }
+        .win-btn:hover { background: rgba(255,255,255,0.3); }
+        .win-btn:active { background: rgba(0,0,0,0.2); transform: scale(0.95); }
+        .win-btn.close:hover { background: rgba(255,0,0,0.7); }
         .win-btn.close { font-family: monospace; font-weight: bold; }
 
         .win-content { flex: 1; position: relative; background: white; overflow: hidden; }
@@ -122,58 +141,109 @@
         .browser-nav { display: flex; gap: 5px; padding: 5px; background: #c0c0c0; border-bottom: 1px solid #888; }
         .iframe-blocker { position: absolute; top:0; left:0; width:100%; height:100%; display: none; }
 
-        /* Taskbar */
+        /* Taskbar Vista Style */
         #taskbar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: var(--taskbar-height);
-            background: #c0c0c0; border-top: 2px solid #fff;
+            background: linear-gradient(to bottom, #4a90e2 0%, #357abd 50%, #2a5f8f 100%);
+            border-top: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.3);
             display: flex; align-items: center; padding: 2px; z-index: 10000;
         }
         .start-btn {
-            height: 32px; padding: 0 10px; display: flex; align-items: center; gap: 5px;
-            border: 2px solid; border-color: #fff #404040 #404040 #fff;
-            font-weight: bold; font-style: italic; cursor: pointer; margin-right: 5px;
+            height: 36px; padding: 0 15px; display: flex; align-items: center; gap: 8px;
+            background: linear-gradient(to bottom, #5ba0f2 0%, #4a90e2 50%, #357abd 100%);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            font-weight: 600; font-size: 13px; cursor: pointer; margin-right: 5px;
+            color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.2);
+            transition: all 0.2s;
         }
-        .start-btn:active { border-color: #404040 #fff #fff #404040; transform: translateY(1px); }
+        .start-btn:hover { background: linear-gradient(to bottom, #6bb0ff 0%, #5ba0f2 50%, #4a90e2 100%); }
+        .start-btn:active { box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); transform: translateY(1px); }
         
-        .task-container { flex: 1; display: flex; gap: 2px; padding-left: 5px; }
+        .task-container { flex: 1; display: flex; gap: 3px; padding-left: 5px; }
         .task-item {
-            min-width: 120px; max-width: 200px; background: #c0c0c0; border: 2px solid; border-color: #fff #404040 #404040 #fff;
-            padding: 4px 8px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;
+            min-width: 120px; max-width: 200px; 
+            background: rgba(255,255,255,0.15); 
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            padding: 6px 10px; font-size: 12px; cursor: pointer; 
+            display: flex; align-items: center; gap: 6px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 1;
+            color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            transition: all 0.2s;
         }
+        .task-item:hover { background: rgba(255,255,255,0.25); }
         .task-item.active-task {
-            background: #e0e0e0; border-color: #404040 #fff #fff #404040; background-image: linear-gradient(45deg, #ddd 25%, transparent 25%, transparent 50%, #ddd 50%, #ddd 75%, transparent 75%, transparent); background-size: 4px 4px;
+            background: rgba(255,255,255,0.3);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        .sys-tray { margin-left: auto; padding: 0 10px; font-size: 12px; border: 2px solid; border-color: #808080 #fff #fff #808080; background: #c0c0c0; height: 30px; display: flex; align-items: center; }
+        .sys-tray { 
+            margin-left: auto; padding: 0 10px; font-size: 12px; 
+            background: rgba(255,255,255,0.1);
+            border-left: 1px solid rgba(255,255,255,0.2);
+            height: 36px; display: flex; align-items: center;
+            color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
 
-        /* Start Menu */
+        /* Start Menu Vista Style */
         #start-menu {
-            position: fixed; bottom: 42px; left: 2px; width: 220px; background: #c0c0c0;
-            border: 2px solid; border-color: #fff #404040 #404040 #fff; padding: 2px; z-index: 10001;
+            position: fixed; bottom: 44px; left: 2px; width: 240px; 
+            background: linear-gradient(to bottom, #f8f8f8 0%, #e8e8e8 100%);
+            border: 1px solid rgba(0,0,0,0.2);
+            border-radius: 6px;
+            box-shadow: var(--vista-shadow);
+            padding: 4px; z-index: 10001;
             display: none; flex-direction: column; max-height: calc(100vh - 50px);
         }
         #start-menu.open { display: flex; }
-        .menu-row { padding: 12px 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.1s; }
-        .menu-row:hover { background: #000080; color: white; }
+        .menu-row { 
+            padding: 10px 12px; display: flex; align-items: center; gap: 10px; 
+            cursor: pointer; transition: all 0.2s;
+            border-radius: 4px; margin: 2px 0;
+        }
+        .menu-row:hover { 
+            background: linear-gradient(to bottom, #4a90e2 0%, #357abd 100%);
+            color: white; 
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+        }
 
-        /* Calculator Styles */
-        .calc-container { background: #c0c0c0; padding: 10px; height: 100%; display: flex; flex-direction: column; }
+        /* Calculator Styles Vista */
+        .calc-container { 
+            background: linear-gradient(to bottom, #f8f8f8 0%, #e8e8e8 100%);
+            padding: 10px; height: 100%; display: flex; flex-direction: column; 
+        }
         .calc-display {
-            background: black; color: #00ff00; font-family: "Courier New", monospace; font-size: 24px;
-            padding: 10px; text-align: right; border: 2px inset; margin-bottom: 10px; min-height: 40px;
+            background: linear-gradient(to bottom, #1a1a1a 0%, #000 100%);
+            color: #00ff00; font-family: "Courier New", monospace; font-size: 24px;
+            padding: 10px; text-align: right; border-radius: 4px; margin-bottom: 10px; 
+            min-height: 40px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
         }
         .calc-buttons {
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; flex: 1;
         }
         .calc-btn {
-            background: #e0e0e0; border: 2px outset; padding: 15px; font-size: 16px; cursor: pointer;
-            font-weight: bold; transition: all 0.1s;
+            background: linear-gradient(to bottom, #ffffff 0%, #e8e8e8 100%);
+            border: 1px solid #b0b0b0; border-radius: 4px; padding: 15px; font-size: 16px; 
+            cursor: pointer; font-weight: 600; transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
-        .calc-btn:active { border: 2px inset; }
-        .calc-btn.operator { background: #ffa500; }
-        .calc-btn.equals { background: #0080ff; color: white; }
-        .calc-btn.clear { background: #ff4444; color: white; }
+        .calc-btn:hover { background: linear-gradient(to bottom, #f8f8f8 0%, #e0e0e0 100%); }
+        .calc-btn:active { box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+        .calc-btn.operator { 
+            background: linear-gradient(to bottom, #ff9800 0%, #f57c00 100%);
+            color: white; border-color: #e65100;
+        }
+        .calc-btn.equals { 
+            background: linear-gradient(to bottom, #4a90e2 0%, #357abd 100%);
+            color: white; border-color: #2a5f8f;
+        }
+        .calc-btn.clear { 
+            background: linear-gradient(to bottom, #f44336 0%, #d32f2f 100%);
+            color: white; border-color: #c62828;
+        }
 
         /* Clock Styles */
         .clock-container { padding: 20px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #c0c0c0; }
@@ -194,60 +264,207 @@
         .paint-canvas-container { flex: 1; position: relative; overflow: auto; background: white; }
         .paint-canvas { border: 1px solid #888; cursor: crosshair; display: block; }
 
-        /* Calendar Styles */
+        /* Calendar Styles Vista */
         .calendar-container { padding: 10px; height: 100%; background: white; }
         .calendar-header {
             display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
-            padding: 5px; background: #c0c0c0; border: 2px inset;
+            padding: 8px; background: linear-gradient(to bottom, #f8f8f8 0%, #e8e8e8 100%);
+            border: 1px solid #c0c0c0; border-radius: 4px;
         }
-        .calendar-nav-btn { padding: 5px 15px; border: 2px outset; background: #e0e0e0; cursor: pointer; }
-        .calendar-nav-btn:active { border: 2px inset; }
+        .calendar-nav-btn { 
+            padding: 6px 16px; border: 1px solid #b0b0b0; border-radius: 4px;
+            background: linear-gradient(to bottom, #ffffff 0%, #e8e8e8 100%);
+            cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .calendar-nav-btn:hover { background: linear-gradient(to bottom, #f8f8f8 0%, #e0e0e0 100%); }
+        .calendar-nav-btn:active { box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
         .calendar-grid {
             display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
         }
         .calendar-day-header {
-            background: #000080; color: white; padding: 5px; text-align: center; font-weight: bold; font-size: 12px;
+            background: linear-gradient(to bottom, #4a90e2 0%, #357abd 100%);
+            color: white; padding: 8px; text-align: center; font-weight: 600; font-size: 12px;
+            border-radius: 4px 4px 0 0;
         }
         .calendar-day {
-            background: #f0f0f0; padding: 8px; text-align: center; cursor: pointer; border: 1px solid #ddd;
+            background: #f8f8f8; padding: 8px; text-align: center; cursor: pointer; 
+            border: 1px solid #e0e0e0; border-radius: 4px;
             min-height: 30px; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
         }
-        .calendar-day:hover { background: #e0e0e0; }
-        .calendar-day.other-month { color: #999; }
-        .calendar-day.today { background: #ffff00; font-weight: bold; }
+        .calendar-day:hover { 
+            background: linear-gradient(to bottom, #e8f4fd 0%, #d0e8fd 100%);
+            border-color: #4a90e2;
+        }
+        .calendar-day.other-month { color: #999; background: #f0f0f0; }
+        .calendar-day.today { 
+            background: linear-gradient(to bottom, #fff9c4 0%, #fff59d 100%);
+            font-weight: bold; border-color: #ffc107;
+        }
 
-        /* Stopwatch Styles */
+        /* Stopwatch Styles Vista */
         .stopwatch-container {
             padding: 30px; height: 100%; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; background: #c0c0c0;
+            justify-content: center; background: linear-gradient(to bottom, #f8f8f8 0%, #e8e8e8 100%);
         }
         .stopwatch-display {
             font-size: 5rem; font-family: "Courier New", monospace; font-weight: bold;
-            margin: 30px 0; background: black; color: #00ff00; padding: 20px 40px; border: 3px inset;
+            margin: 30px 0; background: linear-gradient(to bottom, #1a1a1a 0%, #000 100%);
+            color: #00ff00; padding: 20px 40px; border-radius: 8px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
         }
         .stopwatch-controls {
             display: flex; gap: 10px; margin-top: 20px;
         }
         .stopwatch-btn {
-            padding: 10px 20px; border: 2px outset; background: #e0e0e0; cursor: pointer;
-            font-size: 14px; font-weight: bold;
+            padding: 10px 20px; border: 1px solid #b0b0b0; border-radius: 4px;
+            background: linear-gradient(to bottom, #ffffff 0%, #e8e8e8 100%);
+            cursor: pointer; font-size: 14px; font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: all 0.2s;
         }
-        .stopwatch-btn:active { border: 2px inset; }
-        .stopwatch-btn.start { background: #00ff00; }
-        .stopwatch-btn.stop { background: #ff4444; color: white; }
-        .stopwatch-btn.reset { background: #ffa500; }
+        .stopwatch-btn:hover { background: linear-gradient(to bottom, #f8f8f8 0%, #e0e0e0 100%); }
+        .stopwatch-btn:active { box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+        .stopwatch-btn.start { 
+            background: linear-gradient(to bottom, #4caf50 0%, #388e3c 100%);
+            color: white; border-color: #2e7d32;
+        }
+        .stopwatch-btn.stop { 
+            background: linear-gradient(to bottom, #f44336 0%, #d32f2f 100%);
+            color: white; border-color: #c62828;
+        }
+        .stopwatch-btn.reset { 
+            background: linear-gradient(to bottom, #ff9800 0%, #f57c00 100%);
+            color: white; border-color: #e65100;
+        }
         .stopwatch-laps {
             margin-top: 20px; max-height: 200px; overflow-y: auto; width: 100%;
             background: white; border: 2px inset; padding: 10px;
         }
+
+        /* Vista Style Buttons */
+        .vista-btn {
+            background: linear-gradient(to bottom, #ffffff 0%, #e8e8e8 100%);
+            border: 1px solid #b0b0b0;
+            border-radius: 4px;
+            padding: 6px 16px;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8);
+            transition: all 0.2s;
+        }
+        .vista-btn:hover {
+            background: linear-gradient(to bottom, #f8f8f8 0%, #e0e0e0 100%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        .vista-btn:active {
+            background: linear-gradient(to bottom, #e0e0e0 0%, #d0d0d0 100%);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* File Explorer Styles */
+        .explorer-toolbar {
+            background: linear-gradient(to bottom, #f8f8f8 0%, #e8e8e8 100%);
+            padding: 8px; border-bottom: 1px solid #c0c0c0;
+            display: flex; gap: 5px; align-items: center;
+        }
+        .explorer-sidebar {
+            width: 200px; background: #f5f5f5; border-right: 1px solid #c0c0c0;
+            padding: 10px; overflow-y: auto;
+        }
+        .explorer-content {
+            flex: 1; padding: 10px; overflow-y: auto; background: white;
+        }
+        .file-item {
+            padding: 8px; margin: 2px 0; border-radius: 4px; cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            transition: background 0.2s;
+        }
+        .file-item:hover { background: #e8f4fd; }
+        .file-item.selected { background: #cce8ff; }
+
+        /* Media Player Styles */
+        .player-controls {
+            background: linear-gradient(to bottom, #2a2a2a 0%, #1a1a1a 100%);
+            padding: 15px; display: flex; align-items: center; gap: 10px;
+            border-top: 1px solid #000;
+        }
+        .player-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(to bottom, #4a4a4a 0%, #2a2a2a 100%);
+            border: 1px solid #000; color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; transition: all 0.2s;
+        }
+        .player-btn:hover { background: linear-gradient(to bottom, #5a5a5a 0%, #3a3a3a 100%); }
+        .player-btn.play { width: 50px; height: 50px; font-size: 24px; }
+        .player-progress {
+            flex: 1; height: 6px; background: #333; border-radius: 3px;
+            position: relative; cursor: pointer;
+        }
+        .player-progress-bar {
+            height: 100%; background: linear-gradient(to bottom, #4a90e2 0%, #357abd 100%);
+            border-radius: 3px; width: 0%;
+        }
+        .player-info {
+            padding: 15px; background: #1a1a1a; color: white;
+            text-align: center; font-size: 14px;
+        }
+
+        /* Weather Styles */
+        .weather-container {
+            padding: 20px; background: linear-gradient(to bottom, #87ceeb 0%, #4682b4 100%);
+            color: white; height: 100%;
+        }
+        .weather-main {
+            text-align: center; margin: 20px 0;
+        }
+        .weather-temp {
+            font-size: 4rem; font-weight: 300; margin: 10px 0;
+        }
+        .weather-desc {
+            font-size: 1.5rem; margin: 10px 0;
+        }
+        .weather-details {
+            background: rgba(255,255,255,0.2); border-radius: 8px;
+            padding: 15px; margin-top: 20px;
+        }
+        .weather-item {
+            display: flex; justify-content: space-between; padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* Task Manager Styles */
+        .taskmgr-tabs {
+            display: flex; background: #e8e8e8; border-bottom: 1px solid #c0c0c0;
+        }
+        .taskmgr-tab {
+            padding: 8px 16px; cursor: pointer; border-right: 1px solid #c0c0c0;
+            background: #f0f0f0; transition: background 0.2s;
+        }
+        .taskmgr-tab.active {
+            background: white; border-bottom: 2px solid #4a90e2;
+        }
+        .taskmgr-content {
+            padding: 10px; height: calc(100% - 40px); overflow-y: auto;
+        }
+        .taskmgr-list {
+            list-style: none; padding: 0; margin: 0;
+        }
+        .taskmgr-item {
+            padding: 8px; border-bottom: 1px solid #e0e0e0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .taskmgr-item:hover { background: #f5f5f5; }
     </style>
 </head>
 <body>
 
     <div id="boot-screen" class="layer">
         <div class="spinner"></div>
-        <h2>WebOS v5.0</h2>
-        <p>Minesweeper Edition</p>
+        <h2>WebOS v6.0</h2>
+        <p>Vista Edition</p>
     </div>
 
     <div id="lock-screen" class="layer" style="display:none;">
@@ -293,6 +510,22 @@
             <div class="icon" onclick="app.open('stopwatch')">
                 <span class="icon-emoji">⏱️</span>
                 <span>ストップウォッチ</span>
+            </div>
+            <div class="icon" onclick="app.open('explorer')">
+                <span class="icon-emoji">📁</span>
+                <span>エクスプローラー</span>
+            </div>
+            <div class="icon" onclick="app.open('media')">
+                <span class="icon-emoji">🎵</span>
+                <span>メディアプレーヤー</span>
+            </div>
+            <div class="icon" onclick="app.open('weather')">
+                <span class="icon-emoji">☀️</span>
+                <span>天気</span>
+            </div>
+            <div class="icon" onclick="app.open('taskmgr')">
+                <span class="icon-emoji">📊</span>
+                <span>タスクマネージャー</span>
             </div>
         </div>
 
@@ -466,6 +699,154 @@
             </div>
         </div>
 
+        <div id="win-explorer" class="window" style="width: 700px; height: 500px; top: 10%; left: 15%;" data-title="エクスプローラー">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-explorer')">
+                <span>エクスプローラー</span>
+                <div class="win-actions">
+                    <button class="win-btn" onclick="wm.minimize('win-explorer')">_</button>
+                    <button class="win-btn close" onclick="wm.close('win-explorer')">×</button>
+                </div>
+            </div>
+            <div class="win-content" style="display:flex; flex-direction:column;">
+                <div class="explorer-toolbar">
+                    <button class="vista-btn" onclick="explorerApp.goBack()">← 戻る</button>
+                    <button class="vista-btn" onclick="explorerApp.goForward()">進む →</button>
+                    <button class="vista-btn" onclick="explorerApp.refresh()">🔄</button>
+                    <div style="flex:1;"></div>
+                    <input type="text" placeholder="検索..." style="padding:4px 8px; border:1px solid #b0b0b0; border-radius:4px; width:200px;">
+                </div>
+                <div style="display:flex; flex:1; overflow:hidden;">
+                    <div class="explorer-sidebar">
+                        <div class="file-item" onclick="explorerApp.navigate('desktop')">🖥️ デスクトップ</div>
+                        <div class="file-item" onclick="explorerApp.navigate('documents')">📄 ドキュメント</div>
+                        <div class="file-item" onclick="explorerApp.navigate('pictures')">🖼️ ピクチャ</div>
+                        <div class="file-item" onclick="explorerApp.navigate('music')">🎵 ミュージック</div>
+                        <div class="file-item" onclick="explorerApp.navigate('videos')">🎬 ビデオ</div>
+                    </div>
+                    <div class="explorer-content" id="explorer-content">
+                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:10px;">
+                            <div class="file-item" onclick="explorerApp.selectFile('file1.txt')">📄 file1.txt</div>
+                            <div class="file-item" onclick="explorerApp.selectFile('image.jpg')">🖼️ image.jpg</div>
+                            <div class="file-item" onclick="explorerApp.selectFile('document.pdf')">📄 document.pdf</div>
+                            <div class="file-item" onclick="explorerApp.selectFile('music.mp3')">🎵 music.mp3</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-media" class="window" style="width: 500px; height: 400px; top: 15%; left: 20%;" data-title="メディアプレーヤー">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-media')">
+                <span>Windows Media Player</span>
+                <div class="win-actions">
+                    <button class="win-btn" onclick="wm.minimize('win-media')">_</button>
+                    <button class="win-btn close" onclick="wm.close('win-media')">×</button>
+                </div>
+            </div>
+            <div class="win-content" style="display:flex; flex-direction:column; background:#1a1a1a;">
+                <div class="player-info" id="media-info">
+                    <div style="font-size:18px; font-weight:bold;">Now Playing</div>
+                    <div id="media-title" style="margin-top:10px;">曲名がここに表示されます</div>
+                    <div id="media-artist" style="opacity:0.8; margin-top:5px;">アーティスト名</div>
+                </div>
+                <div style="flex:1; background:linear-gradient(to bottom, #2a2a2a 0%, #1a1a1a 100%); display:flex; align-items:center; justify-content:center; color:white; font-size:48px;">
+                    🎵
+                </div>
+                <div class="player-controls">
+                    <button class="player-btn" onclick="mediaPlayer.prev()">⏮</button>
+                    <button class="player-btn play" id="media-play" onclick="mediaPlayer.toggle()">▶</button>
+                    <button class="player-btn" onclick="mediaPlayer.next()">⏭</button>
+                    <div class="player-progress" onclick="mediaPlayer.seek(event)">
+                        <div class="player-progress-bar" id="media-progress"></div>
+                    </div>
+                    <div style="color:white; min-width:60px; text-align:center; font-size:12px;">
+                        <span id="media-time">0:00</span> / <span id="media-duration">3:45</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-weather" class="window" style="width: 400px; height: 500px; top: 10%; left: 25%;" data-title="天気">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-weather')">
+                <span>天気</span>
+                <div class="win-actions">
+                    <button class="win-btn" onclick="wm.minimize('win-weather')">_</button>
+                    <button class="win-btn close" onclick="wm.close('win-weather')">×</button>
+                </div>
+            </div>
+            <div class="win-content">
+                <div class="weather-container">
+                    <div class="weather-main">
+                        <div style="font-size:5rem; margin:20px 0;">☀️</div>
+                        <div class="weather-temp" id="weather-temp">22°</div>
+                        <div class="weather-desc" id="weather-desc">晴れ</div>
+                        <div style="margin-top:10px; opacity:0.9;" id="weather-location">東京, 日本</div>
+                    </div>
+                    <div class="weather-details">
+                        <div class="weather-item">
+                            <span>体感温度</span>
+                            <span id="weather-feels">24°</span>
+                        </div>
+                        <div class="weather-item">
+                            <span>湿度</span>
+                            <span id="weather-humidity">65%</span>
+                        </div>
+                        <div class="weather-item">
+                            <span>風速</span>
+                            <span id="weather-wind">12 km/h</span>
+                        </div>
+                        <div class="weather-item">
+                            <span>気圧</span>
+                            <span id="weather-pressure">1013 hPa</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:20px; text-align:center;">
+                        <button class="vista-btn" onclick="weatherApp.refresh()" style="background:rgba(255,255,255,0.3); color:white; border-color:rgba(255,255,255,0.5);">更新</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-taskmgr" class="window" style="width: 600px; height: 500px; top: 10%; left: 20%;" data-title="タスクマネージャー">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-taskmgr')">
+                <span>タスクマネージャー</span>
+                <div class="win-actions">
+                    <button class="win-btn" onclick="wm.minimize('win-taskmgr')">_</button>
+                    <button class="win-btn close" onclick="wm.close('win-taskmgr')">×</button>
+                </div>
+            </div>
+            <div class="win-content" style="display:flex; flex-direction:column;">
+                <div class="taskmgr-tabs">
+                    <div class="taskmgr-tab active" onclick="taskMgr.switchTab('processes')">プロセス</div>
+                    <div class="taskmgr-tab" onclick="taskMgr.switchTab('performance')">パフォーマンス</div>
+                </div>
+                <div class="taskmgr-content" id="taskmgr-content">
+                    <ul class="taskmgr-list" id="taskmgr-list">
+                        <li class="taskmgr-item">
+                            <span>マインスイーパ</span>
+                            <span>12.5 MB</span>
+                        </li>
+                        <li class="taskmgr-item">
+                            <span>ブラウザ</span>
+                            <span>45.2 MB</span>
+                        </li>
+                        <li class="taskmgr-item">
+                            <span>メモ帳</span>
+                            <span>8.1 MB</span>
+                        </li>
+                        <li class="taskmgr-item">
+                            <span>計算機</span>
+                            <span>5.3 MB</span>
+                        </li>
+                        <li class="taskmgr-item">
+                            <span>時計</span>
+                            <span>6.7 MB</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <div id="taskbar">
             <div class="start-btn" onclick="sys.toggleStart()">
                 <span style="color:red; font-weight:900;">❖</span> Start
@@ -485,6 +866,10 @@
             <div class="menu-row" onclick="app.open('paint'); sys.toggleStart()">🎨 ペイント</div>
             <div class="menu-row" onclick="app.open('calendar'); sys.toggleStart()">📅 カレンダー</div>
             <div class="menu-row" onclick="app.open('stopwatch'); sys.toggleStart()">⏱️ ストップウォッチ</div>
+            <div class="menu-row" onclick="app.open('explorer'); sys.toggleStart()">📁 エクスプローラー</div>
+            <div class="menu-row" onclick="app.open('media'); sys.toggleStart()">🎵 メディアプレーヤー</div>
+            <div class="menu-row" onclick="app.open('weather'); sys.toggleStart()">☀️ 天気</div>
+            <div class="menu-row" onclick="app.open('taskmgr'); sys.toggleStart()">📊 タスクマネージャー</div>
             <div style="height:1px; background:#808080; margin:5px 0;"></div>
             <div class="menu-row" onclick="app.open('settings'); sys.toggleStart()">⚙️ 設定</div>
             <div style="height:1px; background:#808080; margin:5px 0;"></div>
@@ -578,7 +963,8 @@
                 const icons = {
                     'win-game': '💣 ', 'win-browser': '🌐 ', 'win-notepad': '📝 ',
                     'win-calculator': '🔢 ', 'win-clock': '🕐 ', 'win-paint': '🎨 ',
-                    'win-calendar': '📅 ', 'win-stopwatch': '⏱️ ', 'win-settings': '⚙️ '
+                    'win-calendar': '📅 ', 'win-stopwatch': '⏱️ ', 'win-settings': '⚙️ ',
+                    'win-explorer': '📁 ', 'win-media': '🎵 ', 'win-weather': '☀️ ', 'win-taskmgr': '📊 '
                 };
                 el.innerHTML = (icons[id] || '📄 ') + title;
                 el.onclick = () => {
@@ -606,6 +992,10 @@
                 if(name==='paint') paintApp.init();
                 if(name==='calendar') calendarApp.init();
                 if(name==='stopwatch') stopwatchApp.init();
+                if(name==='explorer') explorerApp.init();
+                if(name==='media') mediaPlayer.init();
+                if(name==='weather') weatherApp.init();
+                if(name==='taskmgr') taskMgr.init();
             }
         };
         const browser = {
@@ -1019,6 +1409,199 @@
                 const seconds = totalSeconds % 60;
                 const centiseconds = Math.floor((ms % 1000) / 10);
                 return `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}:${centiseconds.toString().padStart(2,'0')}`;
+            }
+        };
+
+        /* --- FILE EXPLORER --- */
+        const explorerApp = {
+            currentPath: 'desktop',
+            history: [],
+            init: () => {
+                explorerApp.navigate('desktop');
+            },
+            navigate: (path) => {
+                explorerApp.history.push(explorerApp.currentPath);
+                explorerApp.currentPath = path;
+                const content = document.getElementById('explorer-content');
+                const folders = {
+                    desktop: ['📄 file1.txt', '🖼️ image.jpg', '📄 document.pdf', '🎵 music.mp3'],
+                    documents: ['📄 report.docx', '📄 notes.txt', '📄 presentation.pptx'],
+                    pictures: ['🖼️ photo1.jpg', '🖼️ photo2.png', '🖼️ screenshot.png'],
+                    music: ['🎵 song1.mp3', '🎵 song2.mp3', '🎵 album.mp3'],
+                    videos: ['🎬 video1.mp4', '🎬 movie.mp4']
+                };
+                content.innerHTML = `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:10px;">
+                    ${folders[path]?.map(f => `<div class="file-item" onclick="explorerApp.selectFile('${f}')">${f}</div>`).join('') || ''}
+                </div>`;
+            },
+            goBack: () => {
+                if(explorerApp.history.length > 0) {
+                    explorerApp.currentPath = explorerApp.history.pop();
+                    explorerApp.navigate(explorerApp.currentPath);
+                }
+            },
+            goForward: () => {},
+            refresh: () => explorerApp.navigate(explorerApp.currentPath),
+            selectFile: (file) => {
+                document.querySelectorAll('.file-item').forEach(item => item.classList.remove('selected'));
+                event.target.classList.add('selected');
+            }
+        };
+
+        /* --- MEDIA PLAYER --- */
+        const mediaPlayer = {
+            isPlaying: false,
+            currentTime: 0,
+            duration: 225,
+            interval: null,
+            songs: [
+                {title: 'Sample Song 1', artist: 'Artist A'},
+                {title: 'Sample Song 2', artist: 'Artist B'},
+                {title: 'Sample Song 3', artist: 'Artist C'}
+            ],
+            currentSong: 0,
+            init: () => {
+                mediaPlayer.loadSong(0);
+            },
+            loadSong: (index) => {
+                const song = mediaPlayer.songs[index];
+                document.getElementById('media-title').textContent = song.title;
+                document.getElementById('media-artist').textContent = song.artist;
+                mediaPlayer.currentTime = 0;
+                mediaPlayer.updateProgress();
+            },
+            toggle: () => {
+                const btn = document.getElementById('media-play');
+                if(mediaPlayer.isPlaying) {
+                    mediaPlayer.pause();
+                    btn.textContent = '▶';
+                } else {
+                    mediaPlayer.play();
+                    btn.textContent = '⏸';
+                }
+            },
+            play: () => {
+                mediaPlayer.isPlaying = true;
+                mediaPlayer.interval = setInterval(() => {
+                    mediaPlayer.currentTime++;
+                    if(mediaPlayer.currentTime >= mediaPlayer.duration) {
+                        mediaPlayer.next();
+                    }
+                    mediaPlayer.updateProgress();
+                }, 1000);
+            },
+            pause: () => {
+                mediaPlayer.isPlaying = false;
+                if(mediaPlayer.interval) clearInterval(mediaPlayer.interval);
+            },
+            next: () => {
+                mediaPlayer.currentSong = (mediaPlayer.currentSong + 1) % mediaPlayer.songs.length;
+                mediaPlayer.loadSong(mediaPlayer.currentSong);
+                if(mediaPlayer.isPlaying) mediaPlayer.play();
+            },
+            prev: () => {
+                mediaPlayer.currentSong = (mediaPlayer.currentSong - 1 + mediaPlayer.songs.length) % mediaPlayer.songs.length;
+                mediaPlayer.loadSong(mediaPlayer.currentSong);
+                if(mediaPlayer.isPlaying) mediaPlayer.play();
+            },
+            seek: (e) => {
+                const progress = e.currentTarget;
+                const rect = progress.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                mediaPlayer.currentTime = Math.floor(mediaPlayer.duration * percent);
+                mediaPlayer.updateProgress();
+            },
+            updateProgress: () => {
+                const percent = (mediaPlayer.currentTime / mediaPlayer.duration) * 100;
+                document.getElementById('media-progress').style.width = percent + '%';
+                document.getElementById('media-time').textContent = mediaPlayer.formatTime(mediaPlayer.currentTime);
+                document.getElementById('media-duration').textContent = mediaPlayer.formatTime(mediaPlayer.duration);
+            },
+            formatTime: (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins}:${secs.toString().padStart(2,'0')}`;
+            }
+        };
+
+        /* --- WEATHER APP --- */
+        const weatherApp = {
+            init: () => {
+                weatherApp.update();
+            },
+            update: () => {
+                const temps = [18, 20, 22, 24, 26];
+                const conditions = ['晴れ', '曇り', '雨', '晴れ', '晴れ'];
+                const icons = ['☀️', '☁️', '🌧️', '☀️', '☀️'];
+                const random = Math.floor(Math.random() * temps.length);
+                document.getElementById('weather-temp').textContent = temps[random] + '°';
+                document.getElementById('weather-desc').textContent = conditions[random];
+                document.querySelector('.weather-main').innerHTML = 
+                    `<div style="font-size:5rem; margin:20px 0;">${icons[random]}</div>` +
+                    `<div class="weather-temp" id="weather-temp">${temps[random]}°</div>` +
+                    `<div class="weather-desc" id="weather-desc">${conditions[random]}</div>` +
+                    `<div style="margin-top:10px; opacity:0.9;" id="weather-location">東京, 日本</div>`;
+                document.getElementById('weather-feels').textContent = (temps[random] + 2) + '°';
+                document.getElementById('weather-humidity').textContent = (50 + Math.floor(Math.random() * 30)) + '%';
+                document.getElementById('weather-wind').textContent = (5 + Math.floor(Math.random() * 15)) + ' km/h';
+                document.getElementById('weather-pressure').textContent = (1000 + Math.floor(Math.random() * 30)) + ' hPa';
+            },
+            refresh: () => weatherApp.update()
+        };
+
+        /* --- TASK MANAGER --- */
+        const taskMgr = {
+            currentTab: 'processes',
+            init: () => {
+                taskMgr.updateProcesses();
+                setInterval(taskMgr.updateProcesses, 2000);
+            },
+            switchTab: (tab) => {
+                taskMgr.currentTab = tab;
+                document.querySelectorAll('.taskmgr-tab').forEach(t => t.classList.remove('active'));
+                event.target.classList.add('active');
+                const content = document.getElementById('taskmgr-content');
+                if(tab === 'processes') {
+                    content.innerHTML = `<ul class="taskmgr-list" id="taskmgr-list"></ul>`;
+                    taskMgr.updateProcesses();
+                } else {
+                    content.innerHTML = `
+                        <div style="padding:20px;">
+                            <h3>パフォーマンス</h3>
+                            <div style="margin:20px 0;">
+                                <div>CPU使用率: <span id="cpu-usage">${(Math.random() * 30 + 20).toFixed(1)}%</span></div>
+                                <div style="background:#e0e0e0; height:20px; border-radius:4px; margin:10px 0; overflow:hidden;">
+                                    <div style="background:linear-gradient(to right, #4a90e2, #357abd); height:100%; width:${Math.random() * 30 + 20}%;"></div>
+                                </div>
+                            </div>
+                            <div style="margin:20px 0;">
+                                <div>メモリ使用率: <span id="mem-usage">${(Math.random() * 40 + 30).toFixed(1)}%</span></div>
+                                <div style="background:#e0e0e0; height:20px; border-radius:4px; margin:10px 0; overflow:hidden;">
+                                    <div style="background:linear-gradient(to right, #4a90e2, #357abd); height:100%; width:${Math.random() * 40 + 30}%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            updateProcesses: () => {
+                const list = document.getElementById('taskmgr-list');
+                if(!list) return;
+                const processes = [
+                    {name: 'マインスイーパ', mem: (Math.random() * 5 + 10).toFixed(1)},
+                    {name: 'ブラウザ', mem: (Math.random() * 20 + 30).toFixed(1)},
+                    {name: 'メモ帳', mem: (Math.random() * 3 + 5).toFixed(1)},
+                    {name: '計算機', mem: (Math.random() * 2 + 3).toFixed(1)},
+                    {name: '時計', mem: (Math.random() * 2 + 4).toFixed(1)},
+                    {name: 'ペイント', mem: (Math.random() * 5 + 8).toFixed(1)},
+                    {name: 'カレンダー', mem: (Math.random() * 3 + 6).toFixed(1)}
+                ];
+                list.innerHTML = processes.map(p => 
+                    `<li class="taskmgr-item">
+                        <span>${p.name}</span>
+                        <span>${p.mem} MB</span>
+                    </li>`
+                ).join('');
             }
         };
 
