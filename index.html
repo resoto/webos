@@ -41,21 +41,25 @@
         #desktop { background: var(--bg-image) center/cover no-repeat; z-index: 1; overflow: hidden; }
         
         .desktop-icons {
-            padding: 10px; display: flex; flex-direction: column; flex-wrap: wrap; height: calc(100% - var(--taskbar-height)); align-content: flex-start;
+            padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+            grid-auto-rows: minmax(100px, auto); gap: 15px; 
+            height: calc(100% - var(--taskbar-height)); align-content: start;
         }
         .icon {
-            width: 86px; padding: 10px 5px; margin: 5px; text-align: center; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-            border-radius: 4px; cursor: pointer; border: 1px solid transparent; transition: 0.1s;
+            width: 100%; max-width: 100px; padding: 15px 10px; text-align: center; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            border-radius: 8px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s ease;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .icon:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
-        .icon-emoji { font-size: 2.5rem; display: block; margin-bottom: 5px; }
+        .icon-emoji { font-size: 3rem; display: block; margin-bottom: 8px; }
 
         /* Windows (Retro Style) */
         .window {
             position: absolute; background: var(--window-bg); 
             border: 2px solid; border-color: #dfdfdf #404040 #404040 #dfdfdf;
             box-shadow: 2px 2px 10px rgba(0,0,0,0.5); display: flex; flex-direction: column;
-            min-width: 200px; min-height: 150px; overflow: hidden;
+            min-width: 200px; min-height: 150px; max-width: 95vw; max-height: 90vh;
+            overflow: hidden;
             opacity: 0; transform: scale(0.95); transition: opacity 0.1s, transform 0.1s;
             pointer-events: none; 
         }
@@ -133,9 +137,9 @@
         
         .task-container { flex: 1; display: flex; gap: 2px; padding-left: 5px; }
         .task-item {
-            width: 150px; background: #c0c0c0; border: 2px solid; border-color: #fff #404040 #404040 #fff;
+            min-width: 120px; max-width: 200px; background: #c0c0c0; border: 2px solid; border-color: #fff #404040 #404040 #fff;
             padding: 4px 8px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 1;
         }
         .task-item.active-task {
             background: #e0e0e0; border-color: #404040 #fff #fff #404040; background-image: linear-gradient(45deg, #ddd 25%, transparent 25%, transparent 50%, #ddd 50%, #ddd 75%, transparent 75%, transparent); background-size: 4px 4px;
@@ -145,13 +149,97 @@
 
         /* Start Menu */
         #start-menu {
-            position: fixed; bottom: 42px; left: 2px; width: 200px; background: #c0c0c0;
+            position: fixed; bottom: 42px; left: 2px; width: 220px; background: #c0c0c0;
             border: 2px solid; border-color: #fff #404040 #404040 #fff; padding: 2px; z-index: 10001;
-            display: none; flex-direction: column;
+            display: none; flex-direction: column; max-height: calc(100vh - 50px);
         }
         #start-menu.open { display: flex; }
-        .menu-row { padding: 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .menu-row { padding: 12px 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.1s; }
         .menu-row:hover { background: #000080; color: white; }
+
+        /* Calculator Styles */
+        .calc-container { background: #c0c0c0; padding: 10px; height: 100%; display: flex; flex-direction: column; }
+        .calc-display {
+            background: black; color: #00ff00; font-family: "Courier New", monospace; font-size: 24px;
+            padding: 10px; text-align: right; border: 2px inset; margin-bottom: 10px; min-height: 40px;
+        }
+        .calc-buttons {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; flex: 1;
+        }
+        .calc-btn {
+            background: #e0e0e0; border: 2px outset; padding: 15px; font-size: 16px; cursor: pointer;
+            font-weight: bold; transition: all 0.1s;
+        }
+        .calc-btn:active { border: 2px inset; }
+        .calc-btn.operator { background: #ffa500; }
+        .calc-btn.equals { background: #0080ff; color: white; }
+        .calc-btn.clear { background: #ff4444; color: white; }
+
+        /* Clock Styles */
+        .clock-container { padding: 20px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #c0c0c0; }
+        .clock-display { font-size: 4rem; font-weight: bold; margin: 20px 0; font-family: "Courier New", monospace; }
+        .date-display { font-size: 1.5rem; margin-bottom: 30px; }
+        .alarm-section { width: 100%; padding: 20px; border: 2px inset; background: white; }
+        .alarm-input { padding: 5px; margin: 5px; width: 60px; border: 1px solid #888; }
+        .alarm-list { margin-top: 10px; max-height: 150px; overflow-y: auto; }
+
+        /* Paint Styles */
+        .paint-toolbar {
+            background: #c0c0c0; padding: 5px; border-bottom: 1px solid #888; display: flex; gap: 5px; flex-wrap: wrap;
+        }
+        .paint-btn {
+            padding: 5px 10px; border: 2px outset; background: #e0e0e0; cursor: pointer; font-size: 12px;
+        }
+        .paint-btn:active { border: 2px inset; }
+        .paint-canvas-container { flex: 1; position: relative; overflow: auto; background: white; }
+        .paint-canvas { border: 1px solid #888; cursor: crosshair; display: block; }
+
+        /* Calendar Styles */
+        .calendar-container { padding: 10px; height: 100%; background: white; }
+        .calendar-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+            padding: 5px; background: #c0c0c0; border: 2px inset;
+        }
+        .calendar-nav-btn { padding: 5px 15px; border: 2px outset; background: #e0e0e0; cursor: pointer; }
+        .calendar-nav-btn:active { border: 2px inset; }
+        .calendar-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+        }
+        .calendar-day-header {
+            background: #000080; color: white; padding: 5px; text-align: center; font-weight: bold; font-size: 12px;
+        }
+        .calendar-day {
+            background: #f0f0f0; padding: 8px; text-align: center; cursor: pointer; border: 1px solid #ddd;
+            min-height: 30px; display: flex; align-items: center; justify-content: center;
+        }
+        .calendar-day:hover { background: #e0e0e0; }
+        .calendar-day.other-month { color: #999; }
+        .calendar-day.today { background: #ffff00; font-weight: bold; }
+
+        /* Stopwatch Styles */
+        .stopwatch-container {
+            padding: 30px; height: 100%; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; background: #c0c0c0;
+        }
+        .stopwatch-display {
+            font-size: 5rem; font-family: "Courier New", monospace; font-weight: bold;
+            margin: 30px 0; background: black; color: #00ff00; padding: 20px 40px; border: 3px inset;
+        }
+        .stopwatch-controls {
+            display: flex; gap: 10px; margin-top: 20px;
+        }
+        .stopwatch-btn {
+            padding: 10px 20px; border: 2px outset; background: #e0e0e0; cursor: pointer;
+            font-size: 14px; font-weight: bold;
+        }
+        .stopwatch-btn:active { border: 2px inset; }
+        .stopwatch-btn.start { background: #00ff00; }
+        .stopwatch-btn.stop { background: #ff4444; color: white; }
+        .stopwatch-btn.reset { background: #ffa500; }
+        .stopwatch-laps {
+            margin-top: 20px; max-height: 200px; overflow-y: auto; width: 100%;
+            background: white; border: 2px inset; padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -186,9 +274,29 @@
                 <span class="icon-emoji">⚙️</span>
                 <span>設定</span>
             </div>
+            <div class="icon" onclick="app.open('calculator')">
+                <span class="icon-emoji">🔢</span>
+                <span>計算機</span>
+            </div>
+            <div class="icon" onclick="app.open('clock')">
+                <span class="icon-emoji">🕐</span>
+                <span>時計</span>
+            </div>
+            <div class="icon" onclick="app.open('paint')">
+                <span class="icon-emoji">🎨</span>
+                <span>ペイント</span>
+            </div>
+            <div class="icon" onclick="app.open('calendar')">
+                <span class="icon-emoji">📅</span>
+                <span>カレンダー</span>
+            </div>
+            <div class="icon" onclick="app.open('stopwatch')">
+                <span class="icon-emoji">⏱️</span>
+                <span>ストップウォッチ</span>
+            </div>
         </div>
 
-        <div id="win-game" class="window" style="width: 280px; height: 360px; top: 50px; left: 150px;" data-title="マインスイーパ">
+        <div id="win-game" class="window" style="width: 300px; height: 380px; top: 10%; left: 10%;" data-title="マインスイーパ">
             <div class="win-header" onmousedown="wm.startDrag(event, 'win-game')">
                 <span>マインスイーパ</span>
                 <div class="win-actions">
@@ -208,7 +316,7 @@
             </div>
         </div>
 
-        <div id="win-browser" class="window" style="width: 800px; height: 600px; top: 30px; left: 30px;" data-title="ブラウザ">
+        <div id="win-browser" class="window" style="width: 80%; max-width: 900px; height: 70%; max-height: 700px; top: 5%; left: 10%;" data-title="ブラウザ">
             <div class="win-header" onmousedown="wm.startDrag(event, 'win-browser')">
                 <span>Web Browser</span>
                 <div class="win-actions">
@@ -228,7 +336,7 @@
             </div>
         </div>
 
-        <div id="win-notepad" class="window" style="width: 300px; height: 200px; top: 100px; left: 100px;" data-title="メモ帳">
+        <div id="win-notepad" class="window" style="width: 400px; height: 350px; top: 15%; left: 15%;" data-title="メモ帳">
             <div class="win-header" onmousedown="wm.startDrag(event, 'win-notepad')">
                 <span>無題 - メモ帳</span>
                 <div class="win-actions">
@@ -241,7 +349,7 @@
             </div>
         </div>
 
-        <div id="win-settings" class="window" style="width: 250px; height: 200px; top: 150px; left: 200px;" data-title="設定">
+        <div id="win-settings" class="window" style="width: 350px; height: 300px; top: 20%; left: 20%;" data-title="設定">
             <div class="win-header" onmousedown="wm.startDrag(event, 'win-settings')">
                 <span>設定</span>
                 <div class="win-actions"><button class="win-btn close" onclick="wm.close('win-settings')">×</button></div>
@@ -250,6 +358,111 @@
                 <p>背景設定:</p>
                 <button onclick="document.documentElement.style.setProperty('--bg-image', 'url(https://images.unsplash.com/photo-1477346611705-65d1883cee1e?auto=format&fit=crop&w=1920)')">山</button>
                 <button onclick="document.documentElement.style.setProperty('--bg-image', 'url(https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1920)')">都市</button>
+            </div>
+        </div>
+
+        <div id="win-calculator" class="window" style="width: 280px; height: 380px; top: 10%; left: 15%;" data-title="計算機">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-calculator')">
+                <span>計算機</span>
+                <div class="win-actions">
+                    <button class="win-btn" onclick="wm.minimize('win-calculator')">_</button>
+                    <button class="win-btn close" onclick="wm.close('win-calculator')">×</button>
+                </div>
+            </div>
+            <div class="win-content">
+                <div class="calc-container">
+                    <div class="calc-display" id="calc-display">0</div>
+                    <div class="calc-buttons" id="calc-buttons"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-clock" class="window" style="width: 400px; height: 500px; top: 10%; left: 20%;" data-title="時計">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-clock')">
+                <span>時計・アラーム</span>
+                <div class="win-actions">
+                    <button class="win-btn" onclick="wm.minimize('win-clock')">_</button>
+                    <button class="win-btn close" onclick="wm.close('win-clock')">×</button>
+                </div>
+            </div>
+            <div class="win-content">
+                <div class="clock-container">
+                    <div class="date-display" id="clock-date"></div>
+                    <div class="clock-display" id="clock-time-display">00:00:00</div>
+                    <div class="alarm-section">
+                        <h3>アラーム設定</h3>
+                        <div>
+                            <input type="number" class="alarm-input" id="alarm-hour" min="0" max="23" value="12" placeholder="時">
+                            <span>:</span>
+                            <input type="number" class="alarm-input" id="alarm-minute" min="0" max="59" value="0" placeholder="分">
+                            <button class="paint-btn" onclick="clockApp.addAlarm()">追加</button>
+                        </div>
+                        <div class="alarm-list" id="alarm-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-paint" class="window" style="width: 600px; height: 500px; top: 5%; left: 10%;" data-title="ペイント">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-paint')">
+                <span>ペイント</span>
+                <div class="win-actions">
+                    <button class="win-btn" onclick="wm.minimize('win-paint')">_</button>
+                    <button class="win-btn close" onclick="wm.close('win-paint')">×</button>
+                </div>
+            </div>
+            <div class="win-content" style="display:flex; flex-direction:column;">
+                <div class="paint-toolbar">
+                    <button class="paint-btn" onclick="paintApp.clear()">クリア</button>
+                    <input type="color" id="paint-color" value="#000000" onchange="paintApp.setColor(this.value)">
+                    <input type="range" id="paint-size" min="1" max="20" value="5" oninput="paintApp.setSize(this.value)">
+                    <span id="paint-size-display">5px</span>
+                </div>
+                <div class="paint-canvas-container">
+                    <canvas id="paint-canvas" class="paint-canvas" width="550" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-calendar" class="window" style="width: 500px; height: 450px; top: 10%; left: 15%;" data-title="カレンダー">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-calendar')">
+                <span>カレンダー</span>
+                <div class="win-actions">
+                    <button class="win-btn" onclick="wm.minimize('win-calendar')">_</button>
+                    <button class="win-btn close" onclick="wm.close('win-calendar')">×</button>
+                </div>
+            </div>
+            <div class="win-content">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button class="calendar-nav-btn" onclick="calendarApp.prevMonth()">←</button>
+                        <span id="calendar-month-year" style="font-weight:bold; font-size:16px;"></span>
+                        <button class="calendar-nav-btn" onclick="calendarApp.nextMonth()">→</button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-stopwatch" class="window" style="width: 400px; height: 400px; top: 15%; left: 20%;" data-title="ストップウォッチ">
+            <div class="win-header" onmousedown="wm.startDrag(event, 'win-stopwatch')">
+                <span>ストップウォッチ</span>
+                <div class="win-actions">
+                    <button class="win-btn" onclick="wm.minimize('win-stopwatch')">_</button>
+                    <button class="win-btn close" onclick="wm.close('win-stopwatch')">×</button>
+                </div>
+            </div>
+            <div class="win-content">
+                <div class="stopwatch-container">
+                    <div class="stopwatch-display" id="stopwatch-display">00:00:00</div>
+                    <div class="stopwatch-controls">
+                        <button class="stopwatch-btn start" id="stopwatch-start" onclick="stopwatchApp.start()">開始</button>
+                        <button class="stopwatch-btn stop" id="stopwatch-stop" onclick="stopwatchApp.stop()" style="display:none;">停止</button>
+                        <button class="stopwatch-btn reset" onclick="stopwatchApp.reset()">リセット</button>
+                        <button class="stopwatch-btn" onclick="stopwatchApp.lap()">ラップ</button>
+                    </div>
+                    <div class="stopwatch-laps" id="stopwatch-laps"></div>
+                </div>
             </div>
         </div>
 
@@ -267,6 +480,13 @@
             <div class="menu-row" onclick="app.open('game'); sys.toggleStart()">💣 マインスイーパ</div>
             <div class="menu-row" onclick="app.open('browser'); sys.toggleStart()">🌐 ブラウザ</div>
             <div class="menu-row" onclick="app.open('notepad'); sys.toggleStart()">📝 メモ帳</div>
+            <div class="menu-row" onclick="app.open('calculator'); sys.toggleStart()">🔢 計算機</div>
+            <div class="menu-row" onclick="app.open('clock'); sys.toggleStart()">🕐 時計</div>
+            <div class="menu-row" onclick="app.open('paint'); sys.toggleStart()">🎨 ペイント</div>
+            <div class="menu-row" onclick="app.open('calendar'); sys.toggleStart()">📅 カレンダー</div>
+            <div class="menu-row" onclick="app.open('stopwatch'); sys.toggleStart()">⏱️ ストップウォッチ</div>
+            <div style="height:1px; background:#808080; margin:5px 0;"></div>
+            <div class="menu-row" onclick="app.open('settings'); sys.toggleStart()">⚙️ 設定</div>
             <div style="height:1px; background:#808080; margin:5px 0;"></div>
             <div class="menu-row" onclick="sys.shutdown()">⏻ シャットダウン</div>
         </div>
@@ -355,7 +575,12 @@
                 if(document.getElementById('task-'+id)) return;
                 const el = document.createElement('div');
                 el.id = 'task-'+id; el.className='task-item active-task';
-                el.innerHTML = (id==='win-game'?'💣 ':id==='win-browser'?'🌐 ':'📝 ') + title;
+                const icons = {
+                    'win-game': '💣 ', 'win-browser': '🌐 ', 'win-notepad': '📝 ',
+                    'win-calculator': '🔢 ', 'win-clock': '🕐 ', 'win-paint': '🎨 ',
+                    'win-calendar': '📅 ', 'win-stopwatch': '⏱️ ', 'win-settings': '⚙️ '
+                };
+                el.innerHTML = (icons[id] || '📄 ') + title;
                 el.onclick = () => {
                     const w = document.getElementById(id);
                     if(w.classList.contains('active') && w.style.zIndex==zIndex) wm.minimize(id);
@@ -376,6 +601,11 @@
                 wm.open('win-'+name);
                 if(name==='browser') browser.init();
                 if(name==='game') minesweeper.init();
+                if(name==='calculator') calculator.init();
+                if(name==='clock') clockApp.init();
+                if(name==='paint') paintApp.init();
+                if(name==='calendar') calendarApp.init();
+                if(name==='stopwatch') stopwatchApp.init();
             }
         };
         const browser = {
@@ -524,6 +754,272 @@
             },
 
             pad: (num) => num.toString().padStart(3, '0')
+        };
+
+        /* --- CALCULATOR --- */
+        const calculator = {
+            display: null,
+            current: '0',
+            previous: null,
+            operation: null,
+            init: () => {
+                calculator.display = document.getElementById('calc-display');
+                calculator.current = '0';
+                calculator.previous = null;
+                calculator.operation = null;
+                calculator.updateDisplay();
+                calculator.createButtons();
+            },
+            createButtons: () => {
+                const buttons = [
+                    ['C', 'clear'], ['/', 'operator'], ['*', 'operator'], ['-', 'operator'],
+                    ['7', 'number'], ['8', 'number'], ['9', 'number'], ['+', 'operator'],
+                    ['4', 'number'], ['5', 'number'], ['6', 'number'], ['=', 'equals'],
+                    ['1', 'number'], ['2', 'number'], ['3', 'number'], ['', ''],
+                    ['0', 'number'], ['.', 'number'], ['', ''], ['', '']
+                ];
+                const container = document.getElementById('calc-buttons');
+                container.innerHTML = '';
+                buttons.forEach(([label, type]) => {
+                    if(!label) return;
+                    const btn = document.createElement('button');
+                    btn.className = `calc-btn ${type}`;
+                    btn.textContent = label;
+                    btn.onclick = () => calculator.handleInput(label, type);
+                    container.appendChild(btn);
+                });
+            },
+            handleInput: (value, type) => {
+                if(type === 'number') {
+                    if(calculator.current === '0') calculator.current = value;
+                    else calculator.current += value;
+                } else if(type === 'operator') {
+                    if(calculator.previous !== null) calculator.calculate();
+                    calculator.previous = calculator.current;
+                    calculator.operation = value;
+                    calculator.current = '0';
+                } else if(type === 'equals') {
+                    calculator.calculate();
+                } else if(type === 'clear') {
+                    calculator.current = '0';
+                    calculator.previous = null;
+                    calculator.operation = null;
+                }
+                calculator.updateDisplay();
+            },
+            calculate: () => {
+                if(calculator.previous === null || calculator.operation === null) return;
+                const prev = parseFloat(calculator.previous);
+                const curr = parseFloat(calculator.current);
+                let result = 0;
+                switch(calculator.operation) {
+                    case '+': result = prev + curr; break;
+                    case '-': result = prev - curr; break;
+                    case '*': result = prev * curr; break;
+                    case '/': result = prev / curr; break;
+                }
+                calculator.current = result.toString();
+                calculator.previous = null;
+                calculator.operation = null;
+            },
+            updateDisplay: () => {
+                calculator.display.textContent = calculator.current;
+            }
+        };
+
+        /* --- CLOCK APP --- */
+        const clockApp = {
+            alarms: [],
+            init: () => {
+                clockApp.update();
+                setInterval(clockApp.update, 1000);
+            },
+            update: () => {
+                const now = new Date();
+                const time = now.toLocaleTimeString('ja-JP');
+                const date = now.toLocaleDateString('ja-JP', {year:'numeric', month:'long', day:'numeric', weekday:'long'});
+                document.getElementById('clock-time-display').textContent = time;
+                document.getElementById('clock-date').textContent = date;
+                clockApp.checkAlarms(now);
+            },
+            addAlarm: () => {
+                const hour = parseInt(document.getElementById('alarm-hour').value);
+                const minute = parseInt(document.getElementById('alarm-minute').value);
+                const time = `${hour.toString().padStart(2,'0')}:${minute.toString().padStart(2,'0')}`;
+                clockApp.alarms.push({hour, minute, time});
+                clockApp.updateAlarmList();
+            },
+            updateAlarmList: () => {
+                const list = document.getElementById('alarm-list');
+                list.innerHTML = clockApp.alarms.map((alarm, i) => 
+                    `<div style="padding:5px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between;">
+                        <span>${alarm.time}</span>
+                        <button onclick="clockApp.removeAlarm(${i})" style="padding:2px 8px;">削除</button>
+                    </div>`
+                ).join('');
+            },
+            removeAlarm: (index) => {
+                clockApp.alarms.splice(index, 1);
+                clockApp.updateAlarmList();
+            },
+            checkAlarms: (now) => {
+                clockApp.alarms.forEach(alarm => {
+                    if(now.getHours() === alarm.hour && now.getMinutes() === alarm.minute && now.getSeconds() === 0) {
+                        alert(`アラーム: ${alarm.time}`);
+                    }
+                });
+            }
+        };
+
+        /* --- PAINT APP --- */
+        const paintApp = {
+            canvas: null,
+            ctx: null,
+            isDrawing: false,
+            color: '#000000',
+            size: 5,
+            init: () => {
+                paintApp.canvas = document.getElementById('paint-canvas');
+                paintApp.ctx = paintApp.canvas.getContext('2d');
+                paintApp.ctx.lineCap = 'round';
+                paintApp.ctx.lineJoin = 'round';
+                paintApp.canvas.onmousedown = (e) => {
+                    paintApp.isDrawing = true;
+                    const rect = paintApp.canvas.getBoundingClientRect();
+                    paintApp.ctx.beginPath();
+                    paintApp.ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+                };
+                paintApp.canvas.onmousemove = (e) => {
+                    if(!paintApp.isDrawing) return;
+                    const rect = paintApp.canvas.getBoundingClientRect();
+                    paintApp.ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+                    paintApp.ctx.stroke();
+                };
+                paintApp.canvas.onmouseup = () => paintApp.isDrawing = false;
+                paintApp.canvas.onmouseleave = () => paintApp.isDrawing = false;
+            },
+            setColor: (color) => {
+                paintApp.color = color;
+                paintApp.ctx.strokeStyle = color;
+            },
+            setSize: (size) => {
+                paintApp.size = parseInt(size);
+                paintApp.ctx.lineWidth = paintApp.size;
+                document.getElementById('paint-size-display').textContent = paintApp.size + 'px';
+            },
+            clear: () => {
+                paintApp.ctx.clearRect(0, 0, paintApp.canvas.width, paintApp.canvas.height);
+            }
+        };
+        // Initialize paint color and size
+        setTimeout(() => {
+            if(document.getElementById('paint-color')) {
+                paintApp.setColor(document.getElementById('paint-color').value);
+                paintApp.setSize(document.getElementById('paint-size').value);
+            }
+        }, 100);
+
+        /* --- CALENDAR APP --- */
+        const calendarApp = {
+            currentDate: new Date(),
+            init: () => {
+                calendarApp.render();
+            },
+            render: () => {
+                const year = calendarApp.currentDate.getFullYear();
+                const month = calendarApp.currentDate.getMonth();
+                const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+                document.getElementById('calendar-month-year').textContent = `${year}年 ${monthNames[month]}`;
+                
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const startDate = new Date(firstDay);
+                startDate.setDate(startDate.getDate() - startDate.getDay());
+                
+                const grid = document.getElementById('calendar-grid');
+                grid.innerHTML = '';
+                
+                const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+                dayNames.forEach(day => {
+                    const header = document.createElement('div');
+                    header.className = 'calendar-day-header';
+                    header.textContent = day;
+                    grid.appendChild(header);
+                });
+                
+                const today = new Date();
+                for(let i = 0; i < 42; i++) {
+                    const date = new Date(startDate);
+                    date.setDate(startDate.getDate() + i);
+                    const day = document.createElement('div');
+                    day.className = 'calendar-day';
+                    day.textContent = date.getDate();
+                    if(date.getMonth() !== month) day.classList.add('other-month');
+                    if(date.toDateString() === today.toDateString()) day.classList.add('today');
+                    grid.appendChild(day);
+                }
+            },
+            prevMonth: () => {
+                calendarApp.currentDate.setMonth(calendarApp.currentDate.getMonth() - 1);
+                calendarApp.render();
+            },
+            nextMonth: () => {
+                calendarApp.currentDate.setMonth(calendarApp.currentDate.getMonth() + 1);
+                calendarApp.render();
+            }
+        };
+
+        /* --- STOPWATCH APP --- */
+        const stopwatchApp = {
+            startTime: 0,
+            elapsed: 0,
+            interval: null,
+            laps: [],
+            init: () => {
+                stopwatchApp.reset();
+            },
+            start: () => {
+                if(stopwatchApp.interval) return;
+                stopwatchApp.startTime = Date.now() - stopwatchApp.elapsed;
+                stopwatchApp.interval = setInterval(() => {
+                    stopwatchApp.elapsed = Date.now() - stopwatchApp.startTime;
+                    stopwatchApp.updateDisplay();
+                }, 10);
+                document.getElementById('stopwatch-start').style.display = 'none';
+                document.getElementById('stopwatch-stop').style.display = 'inline-block';
+            },
+            stop: () => {
+                if(stopwatchApp.interval) {
+                    clearInterval(stopwatchApp.interval);
+                    stopwatchApp.interval = null;
+                }
+                document.getElementById('stopwatch-start').style.display = 'inline-block';
+                document.getElementById('stopwatch-stop').style.display = 'none';
+            },
+            reset: () => {
+                stopwatchApp.stop();
+                stopwatchApp.elapsed = 0;
+                stopwatchApp.laps = [];
+                stopwatchApp.updateDisplay();
+                document.getElementById('stopwatch-laps').innerHTML = '';
+            },
+            lap: () => {
+                if(!stopwatchApp.interval) return;
+                stopwatchApp.laps.push(stopwatchApp.elapsed);
+                const lapList = document.getElementById('stopwatch-laps');
+                const lapTime = stopwatchApp.formatTime(stopwatchApp.elapsed);
+                lapList.innerHTML = `<div style="padding:5px; border-bottom:1px solid #ddd;">ラップ ${stopwatchApp.laps.length}: ${lapTime}</div>` + lapList.innerHTML;
+            },
+            updateDisplay: () => {
+                document.getElementById('stopwatch-display').textContent = stopwatchApp.formatTime(stopwatchApp.elapsed);
+            },
+            formatTime: (ms) => {
+                const totalSeconds = Math.floor(ms / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                const centiseconds = Math.floor((ms % 1000) / 10);
+                return `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}:${centiseconds.toString().padStart(2,'0')}`;
+            }
         };
 
     </script>
