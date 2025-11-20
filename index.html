@@ -25,12 +25,54 @@
         
         /* Boot Screen */
         #boot-screen {
-            background: black; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
+            background: linear-gradient(to bottom, #1a1a1a 0%, #000 100%); 
+            z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
         }
         .spinner {
             width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid #0078d7; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Welcome Screen */
+        #welcome-screen {
+            background: linear-gradient(to bottom, #4a90e2 0%, #357abd 50%, #2a5f8f 100%);
+            z-index: 99998; display: none; flex-direction: column; align-items: center; justify-content: center; 
+            color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: opacity 0.8s ease;
+        }
+        #welcome-screen.show { display: flex; }
+        #welcome-screen.fade-out { opacity: 0; }
+        .welcome-logo {
+            font-size: 5rem; margin-bottom: 30px; animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .welcome-text {
+            font-size: 2.5rem; font-weight: 300; margin-bottom: 10px;
+        }
+        .welcome-subtext {
+            font-size: 1.2rem; opacity: 0.9; margin-top: 10px;
+        }
+        .welcome-progress {
+            width: 300px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px;
+            margin-top: 40px; overflow: hidden;
+        }
+        .welcome-progress-bar {
+            height: 100%; background: white; width: 0%; transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        /* Shutdown Screen */
+        #shutdown-screen {
+            background: linear-gradient(to bottom, #1a1a1a 0%, #000 100%);
+            z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center;
+            color: white;
+        }
+        #shutdown-screen.show { display: flex; }
+        .shutdown-text {
+            font-size: 2rem; margin-bottom: 20px; opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
 
         /* Lock Screen */
         #lock-screen {
@@ -138,7 +180,58 @@
         .ms-c5 { color: maroon; } .ms-c6 { color: teal; } .ms-c7 { color: black; } .ms-c8 { color: gray; }
 
         /* Browser Iframe */
-        .browser-nav { display: flex; gap: 5px; padding: 5px; background: #c0c0c0; border-bottom: 1px solid #888; }
+        .browser-nav { 
+            display: flex; gap: 5px; padding: 8px; 
+            background: linear-gradient(to bottom, #f8f8f8 0%, #e8e8e8 100%);
+            border-bottom: 1px solid #c0c0c0; flex-wrap: wrap; align-items: center;
+        }
+        .browser-toolbar {
+            display: flex; gap: 5px; align-items: center;
+        }
+        .browser-btn {
+            padding: 6px 12px; border: 1px solid #b0b0b0; border-radius: 4px;
+            background: linear-gradient(to bottom, #ffffff 0%, #e8e8e8 100%);
+            cursor: pointer; font-size: 12px; transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .browser-btn:hover { background: linear-gradient(to bottom, #f8f8f8 0%, #e0e0e0 100%); }
+        .browser-btn:active { box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+        .browser-url-bar {
+            flex: 1; min-width: 200px; padding: 6px 10px; border: 1px solid #b0b0b0;
+            border-radius: 4px; font-size: 13px;
+        }
+        .browser-tabs {
+            display: flex; gap: 2px; padding: 5px 5px 0 5px; background: #e0e0e0;
+            border-bottom: 1px solid #c0c0c0; overflow-x: auto;
+        }
+        .browser-tab {
+            padding: 6px 12px; background: #d0d0d0; border: 1px solid #b0b0b0;
+            border-bottom: none; border-radius: 4px 4px 0 0; cursor: pointer;
+            font-size: 12px; white-space: nowrap; position: relative;
+            transition: all 0.2s;
+        }
+        .browser-tab.active {
+            background: white; border-color: #c0c0c0; z-index: 1;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        }
+        .browser-tab:hover:not(.active) { background: #e0e0e0; }
+        .browser-tab-close {
+            margin-left: 6px; padding: 0 4px; border-radius: 2px;
+            cursor: pointer; opacity: 0.6;
+        }
+        .browser-tab-close:hover { opacity: 1; background: rgba(255,0,0,0.2); }
+        .browser-bookmarks {
+            padding: 5px; background: #f0f0f0; border-bottom: 1px solid #c0c0c0;
+            display: flex; gap: 5px; flex-wrap: wrap;
+        }
+        .browser-bookmark {
+            padding: 4px 8px; background: white; border: 1px solid #c0c0c0;
+            border-radius: 3px; cursor: pointer; font-size: 11px;
+            transition: all 0.2s;
+        }
+        .browser-bookmark:hover {
+            background: #e8f4fd; border-color: #4a90e2;
+        }
         .iframe-blocker { position: absolute; top:0; left:0; width:100%; height:100%; display: none; }
 
         /* Taskbar Vista Style */
@@ -461,10 +554,28 @@
 </head>
 <body>
 
+    <!-- Audio elements for startup and shutdown sounds -->
+    <audio id="startup-sound" preload="auto"></audio>
+    <audio id="shutdown-sound" preload="auto"></audio>
+
     <div id="boot-screen" class="layer">
         <div class="spinner"></div>
         <h2>WebOS v6.0</h2>
         <p>Vista Edition</p>
+    </div>
+
+    <div id="welcome-screen" class="layer">
+        <div class="welcome-logo">❖</div>
+        <div class="welcome-text">ようこそ</div>
+        <div class="welcome-subtext">Welcome to WebOS v6.0</div>
+        <div class="welcome-progress">
+            <div class="welcome-progress-bar" id="welcome-progress"></div>
+        </div>
+    </div>
+
+    <div id="shutdown-screen" class="layer">
+        <div class="shutdown-text">シャットダウンしています...</div>
+        <div class="spinner"></div>
     </div>
 
     <div id="lock-screen" class="layer" style="display:none;">
@@ -558,13 +669,33 @@
                 </div>
             </div>
             <div class="win-content" style="display:flex; flex-direction:column;">
-                <div class="browser-nav">
-                    <input type="text" id="browser-url" style="flex:1;" value="https://ja.m.wikipedia.org/wiki/Main_Page" onkeydown="if(event.key==='Enter') browser.go()">
-                    <button onclick="browser.go()">Go</button>
+                <div class="browser-toolbar">
+                    <button class="browser-btn" onclick="browser.goBack()" title="戻る">←</button>
+                    <button class="browser-btn" onclick="browser.goForward()" title="進む">→</button>
+                    <button class="browser-btn" onclick="browser.refresh()" title="更新">🔄</button>
+                    <button class="browser-btn" onclick="browser.home()" title="ホーム">🏠</button>
+                    <input type="text" class="browser-url-bar" id="browser-url" 
+                           value="https://ja.m.wikipedia.org/wiki/Main_Page" 
+                           onkeydown="if(event.key==='Enter') browser.go()">
+                    <button class="browser-btn" onclick="browser.go()">移動</button>
+                    <button class="browser-btn" onclick="browser.addBookmark()" title="ブックマーク">⭐</button>
+                    <button class="browser-btn" onclick="browser.showHistory()" title="履歴">📜</button>
                 </div>
-                <div style="flex:1; position:relative;">
+                <div class="browser-bookmarks" id="browser-bookmarks" style="display:none;">
+                    <!-- Bookmarks will be added here -->
+                </div>
+                <div class="browser-tabs" id="browser-tabs">
+                    <div class="browser-tab active" data-tab="0" onclick="browser.switchTab(0)">
+                        <span>新しいタブ</span>
+                        <span class="browser-tab-close" onclick="browser.closeTab(0, event)">×</span>
+                    </div>
+                </div>
+                <div style="flex:1; position:relative; background:white;">
                     <div class="iframe-blocker" id="browser-blocker"></div>
-                    <iframe id="browser-frame" src="about:blank" style="width:100%; height:100%; border:none;"></iframe>
+                    <div id="browser-frames-container" style="width:100%; height:100%; position:relative;">
+                        <iframe class="browser-frame active" data-tab="0" id="browser-frame-0" 
+                                src="about:blank" style="width:100%; height:100%; border:none; display:block;"></iframe>
+                    </div>
                 </div>
             </div>
         </div>
@@ -881,12 +1012,74 @@
     <script>
         /* --- SYSTEM --- */
         const sys = {
+            playStartupSound: () => {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch(e) {}
+            },
+            playShutdownSound: () => {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 400;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.0);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 1.0);
+                } catch(e) {}
+            },
             boot: () => {
+                // Play startup sound
+                sys.playStartupSound();
+                
                 setTimeout(() => {
                     document.getElementById('boot-screen').style.display = 'none';
-                    document.getElementById('lock-screen').style.display = 'flex';
-                    sys.updateClock();
-                }, 1500);
+                    // Show welcome screen
+                    const welcome = document.getElementById('welcome-screen');
+                    welcome.classList.add('show');
+                    
+                    // Progress bar animation
+                    let progress = 0;
+                    const progressBar = document.getElementById('welcome-progress');
+                    const progressInterval = setInterval(() => {
+                        progress += Math.random() * 15;
+                        if(progress > 100) progress = 100;
+                        progressBar.style.width = progress + '%';
+                        if(progress >= 100) {
+                            clearInterval(progressInterval);
+                            setTimeout(() => {
+                                welcome.classList.add('fade-out');
+                                setTimeout(() => {
+                                    welcome.style.display = 'none';
+                                    document.getElementById('lock-screen').style.display = 'flex';
+                                    sys.updateClock();
+                                }, 800);
+                            }, 500);
+                        }
+                    }, 100);
+                }, 2000);
             },
             updateClock: () => {
                 const now = new Date();
@@ -896,8 +1089,20 @@
             },
             toggleStart: () => document.getElementById('start-menu').classList.toggle('open'),
             shutdown: () => {
+                // Play shutdown sound
+                sys.playShutdownSound();
+                
+                const shutdown = document.getElementById('shutdown-screen');
+                shutdown.classList.add('show');
                 document.getElementById('desktop').style.filter='grayscale(1)';
-                setTimeout(()=>location.reload(), 1000);
+                document.getElementById('desktop').style.opacity='0.5';
+                
+                setTimeout(() => {
+                    shutdown.querySelector('.shutdown-text').textContent = 'コンピューターを安全にシャットダウンしました';
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                }, 2000);
             }
         };
         setInterval(sys.updateClock, 1000);
@@ -999,16 +1204,196 @@
             }
         };
         const browser = {
+            currentTab: 0,
+            tabs: [{url: 'about:blank', title: '新しいタブ'}],
+            history: [],
+            historyIndex: -1,
+            bookmarks: JSON.parse(localStorage.getItem('browser-bookmarks') || '[]'),
+            homeUrl: 'https://ja.m.wikipedia.org/wiki/Main_Page',
+            
             init: () => {
-                const f = document.getElementById('browser-frame');
-                if(f.src==='about:blank') f.src="https://ja.m.wikipedia.org/wiki/Main_Page";
+                browser.loadBookmarks();
+                const f = document.getElementById('browser-frame-0');
+                if(f && f.src==='about:blank') {
+                    browser.goTo(browser.homeUrl);
+                }
             },
+            
+            getCurrentFrame: () => {
+                return document.getElementById(`browser-frame-${browser.currentTab}`);
+            },
+            
+            goTo: (url) => {
+                const frame = browser.getCurrentFrame();
+                if(!frame) return;
+                
+                // Add to history
+                if(browser.history[browser.historyIndex] !== url) {
+                    browser.history = browser.history.slice(0, browser.historyIndex + 1);
+                    browser.history.push(url);
+                    browser.historyIndex = browser.history.length - 1;
+                }
+                
+                frame.src = url;
+                document.getElementById('browser-url').value = url;
+                browser.updateTabTitle(browser.currentTab, url);
+            },
+            
             go: () => {
-                let u = document.getElementById('browser-url').value;
-                if(!u.startsWith('http')) u = 'https://ja.m.wikipedia.org/w/index.php?search='+encodeURIComponent(u);
-                document.getElementById('browser-frame').src = u;
+                let u = document.getElementById('browser-url').value.trim();
+                if(!u) return;
+                if(!u.startsWith('http://') && !u.startsWith('https://')) {
+                    u = 'https://' + u;
+                }
+                browser.goTo(u);
+            },
+            
+            goBack: () => {
+                if(browser.historyIndex > 0) {
+                    browser.historyIndex--;
+                    const url = browser.history[browser.historyIndex];
+                    browser.getCurrentFrame().src = url;
+                    document.getElementById('browser-url').value = url;
+                }
+            },
+            
+            goForward: () => {
+                if(browser.historyIndex < browser.history.length - 1) {
+                    browser.historyIndex++;
+                    const url = browser.history[browser.historyIndex];
+                    browser.getCurrentFrame().src = url;
+                    document.getElementById('browser-url').value = url;
+                }
+            },
+            
+            refresh: () => {
+                const frame = browser.getCurrentFrame();
+                if(frame) frame.src = frame.src;
+            },
+            
+            home: () => {
+                browser.goTo(browser.homeUrl);
+            },
+            
+            addBookmark: () => {
+                const url = document.getElementById('browser-url').value;
+                const title = url.replace(/^https?:\/\//, '').split('/')[0];
+                browser.bookmarks.push({url, title});
+                localStorage.setItem('browser-bookmarks', JSON.stringify(browser.bookmarks));
+                browser.loadBookmarks();
+            },
+            
+            loadBookmarks: () => {
+                const container = document.getElementById('browser-bookmarks');
+                if(browser.bookmarks.length > 0) {
+                    container.style.display = 'flex';
+                    container.innerHTML = browser.bookmarks.map((bm, i) => 
+                        `<div class="browser-bookmark" onclick="browser.goTo('${bm.url}')">${bm.title}</div>`
+                    ).join('');
+                } else {
+                    container.style.display = 'none';
+                }
+            },
+            
+            showHistory: () => {
+                const container = document.getElementById('browser-bookmarks');
+                if(container.style.display === 'none' || container.style.display === '') {
+                    container.style.display = 'flex';
+                    container.innerHTML = browser.history.slice(-10).reverse().map(url => 
+                        `<div class="browser-bookmark" onclick="browser.goTo('${url}')">${url}</div>`
+                    ).join('');
+                } else {
+                    browser.loadBookmarks();
+                }
+            },
+            
+            newTab: () => {
+                const tabId = browser.tabs.length;
+                browser.tabs.push({url: 'about:blank', title: '新しいタブ'});
+                browser.currentTab = tabId;
+                
+                // Add tab button
+                const tabsContainer = document.getElementById('browser-tabs');
+                const tab = document.createElement('div');
+                tab.className = 'browser-tab active';
+                tab.dataset.tab = tabId;
+                tab.innerHTML = `<span>新しいタブ</span><span class="browser-tab-close" onclick="browser.closeTab(${tabId}, event)">×</span>`;
+                tab.onclick = () => browser.switchTab(tabId);
+                tabsContainer.appendChild(tab);
+                
+                // Update other tabs
+                document.querySelectorAll('.browser-tab').forEach(t => {
+                    if(parseInt(t.dataset.tab) !== tabId) t.classList.remove('active');
+                });
+                
+                // Add iframe
+                const container = document.getElementById('browser-frames-container');
+                const frame = document.createElement('iframe');
+                frame.className = 'browser-frame active';
+                frame.id = `browser-frame-${tabId}`;
+                frame.dataset.tab = tabId;
+                frame.src = 'about:blank';
+                frame.style.cssText = 'width:100%; height:100%; border:none; display:block;';
+                container.appendChild(frame);
+                
+                browser.goTo(browser.homeUrl);
+            },
+            
+            switchTab: (tabId) => {
+                browser.currentTab = tabId;
+                document.querySelectorAll('.browser-tab').forEach(t => {
+                    t.classList.toggle('active', parseInt(t.dataset.tab) === tabId);
+                });
+                document.querySelectorAll('.browser-frame').forEach(f => {
+                    f.classList.toggle('active', parseInt(f.dataset.tab) === tabId);
+                    f.style.display = parseInt(f.dataset.tab) === tabId ? 'block' : 'none';
+                });
+                const tab = browser.tabs[tabId];
+                if(tab) {
+                    document.getElementById('browser-url').value = tab.url;
+                }
+            },
+            
+            closeTab: (tabId, e) => {
+                e.stopPropagation();
+                if(browser.tabs.length <= 1) return;
+                
+                browser.tabs.splice(tabId, 1);
+                document.querySelector(`.browser-tab[data-tab="${tabId}"]`)?.remove();
+                document.getElementById(`browser-frame-${tabId}`)?.remove();
+                
+                if(browser.currentTab === tabId) {
+                    browser.currentTab = Math.max(0, tabId - 1);
+                    browser.switchTab(browser.currentTab);
+                }
+            },
+            
+            updateTabTitle: (tabId, url) => {
+                const tab = browser.tabs[tabId];
+                if(tab) {
+                    tab.url = url;
+                    const title = url.replace(/^https?:\/\//, '').split('/')[0];
+                    tab.title = title;
+                    const tabEl = document.querySelector(`.browser-tab[data-tab="${tabId}"]`);
+                    if(tabEl) {
+                        tabEl.querySelector('span:first-child').textContent = title;
+                    }
+                }
             }
         };
+        
+        // Add new tab button
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabsContainer = document.getElementById('browser-tabs');
+            if(tabsContainer) {
+                const newTabBtn = document.createElement('div');
+                newTabBtn.className = 'browser-tab';
+                newTabBtn.innerHTML = '+';
+                newTabBtn.style.cursor = 'pointer';
+                newTabBtn.onclick = () => browser.newTab();
+                tabsContainer.appendChild(newTabBtn);
+            }
+        });
 
         /* --- MINESWEEPER LOGIC --- */
         const minesweeper = {
